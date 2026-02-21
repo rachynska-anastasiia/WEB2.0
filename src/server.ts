@@ -1,0 +1,1 @@
+console.log("Сервер працює на TypeScript!");
