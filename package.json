@@ -7,7 +7,10 @@
     "start": "node dist/server.js",
     "dev": "nodemon",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate:up": "node-pg-migrate up -m ./migrations",
+    "migrate:down": "node-pg-migrate down -m ./migrations",
+    "migrate:create": "node-pg-migrate create -m ./migrations"
   },
   "keywords": [],
   "author": "",
@@ -20,9 +23,12 @@
     "pg": "^8.18.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.3.0",
+    "@types/pg": "^8.16.0",
+    "node-pg-migrate": "^8.0.4",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
