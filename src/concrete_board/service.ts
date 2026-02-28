@@ -8,9 +8,9 @@
 import{
     AddTaskToBoardDTO,
     GetTaskOnBoardByTagDTO,
-    GetTaskOnBoardByPriorityDTO,
+    GetTaskOnBoardByStatusDTO,
     UpdateTaskTagOnBoardDTO,
-    UpdateTaskPriorityOnBoardDTO,
+    UpdateTaskStatusOnBoardDTO,
     DeleteTakOnBoardDTO,
 } from './types';
 import { ConcreteBoardRepository } from "./repository";
@@ -46,11 +46,11 @@ export class ConcreteBoardService{
         
     }
 
-    async GetTaskOnBoardByPriority(payload: GetTaskOnBoardByPriorityDTO){
-        const {priority} = payload;
+    async GetTaskOnBoardByStatus(payload: GetTaskOnBoardByStatusDTO){
+        const {status} = payload;
         
         try {
-            return this.repository.readPriority({priority});
+            return this.repository.readStatus({status});
         } catch(e){
             throw new AppError(500, "Error")
         }
@@ -68,11 +68,11 @@ export class ConcreteBoardService{
         
     }
 
-    async updateTaskPriorityOnBoard(payload: UpdateTaskPriorityOnBoardDTO){
-        const {board_tasks_id, priority} = payload;
+    async updateTaskStatusOnBoard(payload: UpdateTaskStatusOnBoardDTO){
+        const {board_tasks_id, status} = payload;
         
         try {
-            return this.repository.updatePriority({board_tasks_id, priority});
+            return this.repository.updateStatus({board_tasks_id, status});
         } catch(e){
             throw new AppError(500, "Error")
         }

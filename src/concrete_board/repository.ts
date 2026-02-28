@@ -30,18 +30,18 @@ export class ConcreteBoardRepository{
         return result[0];
     }
 
-    async updatePriority(data:any){
+    async updateStatus(data:any){
         const result = await this.pool.query(
-            "UPDATE concrete_board SET priority = $1 WHERE board_tasks_id = $2", 
+            "UPDATE concrete_board SET status = $1 WHERE board_tasks_id = $2", 
             [...data]);
 
         if(result.rows[0]) return result.rows[0];
         else throw new AppError(404, "Error");
     }
 
-    async readPriority(data:any){
+    async readStatus(data:any){
         const result = await this.pool.query(
-            "SELECT * FROM concrete_board WHERE priority = $1", 
+            "SELECT * FROM concrete_board WHERE status = $1", 
             [...data]);
 
         if(result.rows[0]) return result.rows[0];

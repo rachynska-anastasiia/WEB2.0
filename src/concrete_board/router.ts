@@ -26,12 +26,12 @@ todoRoutes.get("/GetTaskOnBoardByTag/:tag", async (req: Request, res) => {
     return service.GetTaskOnBoardByTag({ tag });
 });
 
-todoRoutes.get("/GetTaskOnBoardByPriority/:priority", async (req: Request, res) => {
-    const priority = req.params.priority as string;
-    if (!priority) {
+todoRoutes.get("/GetTaskOnBoardByStatus/:status", async (req: Request, res) => {
+    const status = req.params.status as string;
+    if (!status) {
         return res.status(401).json({message: "Unauthorized"});
     }
-    return service.GetTaskOnBoardByPriority({priority});
+    return service.GetTaskOnBoardByStatus({status});
 });
 
 todoRoutes.put("/updateTaskTagOnBoard", async (req: AuthRequest, res) => {
@@ -45,15 +45,15 @@ todoRoutes.put("/updateTaskTagOnBoard", async (req: AuthRequest, res) => {
     return service.updateTaskTagOnBoard({board_tasks_id, tag});
 });
 
-todoRoutes.put("/updateTaskPriorityOnBoard", async (req: AuthRequest, res) => {
-    const {board_tasks_id, priority} = req.body;
+todoRoutes.put("/updateTaskStatusOnBoard", async (req: AuthRequest, res) => {
+    const {board_tasks_id, status} = req.body;
     if (!board_tasks_id) {
         return res.status(401).json({message: "Unauthorized"});
     }
-    if (!priority) {
+    if (!status) {
         return res.status(401).json({message: "Unauthorized"});
     }
-    return service.updateTaskPriorityOnBoard({board_tasks_id, priority});
+    return service.updateTaskStatusOnBoard({board_tasks_id, status});
 });
 
 todoRoutes.delete("/deleteTakOnBoard", async (req: Request, res) => {

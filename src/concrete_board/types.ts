@@ -7,8 +7,8 @@ export type GetTaskOnBoardByTagDTO = {
     tag: string;
 }
 
-export type GetTaskOnBoardByPriorityDTO = {
-    priority: string;
+export type GetTaskOnBoardByStatusDTO = {
+    status: string;
 }
 
 export type UpdateTaskTagOnBoardDTO = {
@@ -16,9 +16,9 @@ export type UpdateTaskTagOnBoardDTO = {
     tag: string;
 }
 
-export type UpdateTaskPriorityOnBoardDTO = {
+export type UpdateTaskStatusOnBoardDTO = {
     board_tasks_id: BigInt;
-    priority: string;
+    status: string;
 }
 
 export type DeleteTakOnBoardDTO = {
