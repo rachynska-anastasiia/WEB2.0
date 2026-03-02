@@ -1,4 +1,4 @@
-const { type } = require("node:os");
+//const { type } = require("node:os");
 
 exports.up = (pgm) => {
     pgm.createType("status", ["to_do", "in_progress", "completed"]);

@@ -35,6 +35,14 @@ export class ConcreteBoardService{
         
     }
 
+    async GetAllTasksOnBoard(){
+        try {
+            return this.repository.readAll();
+        } catch(e){
+            throw new AppError(500, "Error")
+        }
+    }
+
     async GetTaskOnBoardByTag(payload: GetTaskOnBoardByTagDTO){
         const {tag} = payload;
         

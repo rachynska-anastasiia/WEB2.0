@@ -1,4 +1,4 @@
-import { Router } from "express";
+/*import { Router } from "express";
 import {pool} from "../db";
 import { AuthRequest } from "../middleware/auth";
 const todoRoutes = Router();
@@ -43,4 +43,4 @@ todoRoutes.delete("/:id", async (req: AuthRequest, res) => {
     res.json(result.rows[0]);
 });
 
-export default todoRoutes;
+export default todoRoutes;*/

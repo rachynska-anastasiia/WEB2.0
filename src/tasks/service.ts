@@ -30,20 +30,31 @@ export class TasksService{
         const {title, description} = payload;
         
         try {
-            return this.repository.create({title, description});
+            return await this.repository.create({title, description});
         } catch(e){
-            throw new AppError(500, "Error")
+            if (e instanceof AppError) throw e;
+            throw new AppError(500, "Error");
         }
         
+    }
+
+    async GetAllTasks(){
+        try {
+            return await this.repository.readAll();
+        } catch(e){
+            if (e instanceof AppError) throw e;
+            throw new AppError(500, "Error");
+        }
     }
 
     async GetTaskByTitle(payload: GetTaskByTitleDTO){
         const {title} = payload;
         
         try {
-            return this.repository.readTitle({title});
+            return await this.repository.readTitle({title});
         } catch(e){
-            throw new AppError(500, "Error")
+            if (e instanceof AppError) throw e;
+            throw new AppError(500, "Error");
         }
         
     }
@@ -52,9 +63,10 @@ export class TasksService{
         const {priority} = payload;
         
         try {
-            return this.repository.readPriority({priority});
+            return await this.repository.readPriority({priority});
         } catch(e){
-            throw new AppError(500, "Error")
+            if (e instanceof AppError) throw e;
+            throw new AppError(500, "Error");
         }
         
     }
@@ -63,9 +75,10 @@ export class TasksService{
         const {task_id, title} = payload;
         
         try {
-            return this.repository.updateTitle({task_id, title});
+            return await this.repository.updateTitle({task_id, title});
         } catch(e){
-            throw new AppError(500, "Error")
+            if (e instanceof AppError) throw e;
+            throw new AppError(500, "Error");
         }
         
     }
@@ -74,9 +87,10 @@ export class TasksService{
         const {task_id, description} = payload;
         
         try {
-            return this.repository.updateDescription({task_id, description});
+            return await this.repository.updateDescription({task_id, description});
         } catch(e){
-            throw new AppError(500, "Error")
+            if (e instanceof AppError) throw e;
+            throw new AppError(500, "Error");
         }
         
     }
@@ -85,9 +99,10 @@ export class TasksService{
         const {task_id, due_date} = payload;
         
         try {
-            return this.repository.updateDeadline({task_id, due_date});
+            return await this.repository.updateDeadline({task_id, due_date});
         } catch(e){
-            throw new AppError(500, "Error")
+            if (e instanceof AppError) throw e;
+            throw new AppError(500, "Error");
         }
         
     }
@@ -96,9 +111,10 @@ export class TasksService{
         const {task_id, priority} = payload;
         
         try {
-            return this.repository.updatePriority({task_id, priority});
+            return await this.repository.updatePriority({task_id, priority});
         } catch(e){
-            throw new AppError(500, "Error")
+            if (e instanceof AppError) throw e;
+            throw new AppError(500, "Error");
         }
         
     }
@@ -107,9 +123,10 @@ export class TasksService{
         const {task_id} = payload;
         
         try {
-            return this.repository.delete({task_id});
+            return await this.repository.delete({task_id});
         } catch(e){
-            throw new AppError(500, "Error")
+            if (e instanceof AppError) throw e;
+            throw new AppError(500, "Error");
         }
         
     }

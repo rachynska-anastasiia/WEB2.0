@@ -4,10 +4,14 @@ import cors from "cors";
 
 import usersRoutes from "./routes/users.routes";
 import boardsRoutes from "./routes/boards.routes";
+import todoRoutes from "./concrete_board/router";
+import taskRoutes from "./tasks/router";
+import { errorHandler } from "./errorHandler/service";
+
 
 //import { initTodo } from "./db";
 
-import {Request, Response} from "express";
+//import {Request, Response} from "express";
 
 const app = express();
 
@@ -18,6 +22,10 @@ app.use(express.json());
 //routers
 app.use("/users", usersRoutes);
 app.use("/boards", boardsRoutes);
+app.use("/concrete_board", todoRoutes);
+app.use("/tasks", taskRoutes);
+
+app.use(errorHandler);
 
 
 /*app.get("/", (req: Request, res: Response) => {
