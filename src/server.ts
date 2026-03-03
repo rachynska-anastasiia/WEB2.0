@@ -2,8 +2,8 @@ import express from "express";
 import cors from "cors";
 
 
-import usersRoutes from "./routes/users.routes";
-import boardsRoutes from "./routes/boards.routes";
+import usersRoutes from "./users/router";
+import boardsRoutes from "./boards/router";
 import todoRoutes from "./concrete_board/router";
 import taskRoutes from "./tasks/router";
 import { errorHandler } from "./errorHandler/service";
