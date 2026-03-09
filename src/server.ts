@@ -8,9 +8,6 @@ import todoRoutes from "./concrete_board/router";
 import taskRoutes from "./tasks/router";
 import { errorHandler } from "./errorHandler/service";
 
-
-//import { initTodo } from "./db";
-
 //import {Request, Response} from "express";
 
 const app = express();
