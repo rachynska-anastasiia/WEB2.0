@@ -1,6 +1,6 @@
 export type AddBoardDTO = {
     name: string;
-    user_id: number;
+    //user_id: number;
 }
 
 export type DeleteBoardDTO = {
@@ -8,10 +8,10 @@ export type DeleteBoardDTO = {
 }
 
 export type UpdateBoardNameDTO = {
-    id: number;
+    //id: number;
     name: string;
 }
-
+/*
 export type GetBoardByUserDTO = {
     user_id: number;
-}
+}*/

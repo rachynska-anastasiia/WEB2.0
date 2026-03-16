@@ -23,12 +23,12 @@ export class ConcreteBoardService{
         this.repository = new ConcreteBoardRepository();
     }
 
-    async addTaskToBoard(payload: AddTaskToBoardDTO){
+    async addTaskToBoard(userId: number, payload: AddTaskToBoardDTO){
         //const userId = req.user?.userId;
-        const {user_id, task_id} = payload;
+        const {task_id} = payload;
         
         try {
-            return this.repository.create({user_id, task_id});
+            return this.repository.create({userId, task_id});
         } catch(e){
             throw new AppError(500, "Error")
         }
@@ -43,55 +43,55 @@ export class ConcreteBoardService{
         }
     }
 
-    async GetTaskOnBoardByTag(payload: GetTaskOnBoardByTagDTO){
+    async GetTaskOnBoardByTag(userId: number, payload: GetTaskOnBoardByTagDTO){
         const {tag} = payload;
         
         try {
-            return this.repository.readTag({tag});
+            return this.repository.readTag({userId, tag});
         } catch(e){
             throw new AppError(500, "Error")
         }
         
     }
 
-    async GetTaskOnBoardByStatus(payload: GetTaskOnBoardByStatusDTO){
+    async GetTaskOnBoardByStatus(userId: number, payload: GetTaskOnBoardByStatusDTO){
         const {status} = payload;
         
         try {
-            return this.repository.readStatus({status});
+            return this.repository.readStatus({userId, status});
         } catch(e){
             throw new AppError(500, "Error")
         }
         
     }
 
-    async updateTaskTagOnBoard(payload: UpdateTaskTagOnBoardDTO){
+    async updateTaskTagOnBoard(userId: number, payload: UpdateTaskTagOnBoardDTO){
         const {board_tasks_id, tag} = payload;
         
         try {
-            return this.repository.updateTag({board_tasks_id, tag});
+            return this.repository.updateTag({userId, board_tasks_id, tag});
         } catch(e){
             throw new AppError(500, "Error")
         }
         
     }
 
-    async updateTaskStatusOnBoard(payload: UpdateTaskStatusOnBoardDTO){
+    async updateTaskStatusOnBoard(userId: number, payload: UpdateTaskStatusOnBoardDTO){
         const {board_tasks_id, status} = payload;
         
         try {
-            return this.repository.updateStatus({board_tasks_id, status});
+            return this.repository.updateStatus({userId, board_tasks_id, status});
         } catch(e){
             throw new AppError(500, "Error")
         }
         
     }
 
-    async deleteTakOnBoard(payload: DeleteTakOnBoardDTO){
+    async deleteTakOnBoard(userId: number, payload: DeleteTakOnBoardDTO){
         const {board_tasks_id} = payload;
         
         try {
-            return this.repository.delete({board_tasks_id});
+            return this.repository.delete({userId, board_tasks_id});
         } catch(e){
             throw new AppError(500, "Error")
         }

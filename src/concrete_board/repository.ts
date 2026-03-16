@@ -18,8 +18,8 @@ export class ConcreteBoardRepository{
 
     async delete(data:any){
         const result = await this.pool.query(
-                "DELETE FROM concrete_board WHERE board_tasks_id = $1 RETURNING *", 
-            [data.board_tasks_id]);
+                "DELETE FROM concrete_board WHERE board_tasks_id = $1 and user_id = $2 RETURNING *", 
+            [data.board_tasks_id, data.userId]);
 
         if(result.rows[0]) return result.rows[0];
         else throw new AppError(404, "Task not found");
@@ -27,8 +27,8 @@ export class ConcreteBoardRepository{
 
     async updateTag(data:any){
         const result = await this.pool.query(
-            "UPDATE concrete_board SET tag = $1 WHERE board_tasks_id = $2 RETURNING *",
-            [data.tag, data.board_tasks_id]);
+            "UPDATE concrete_board SET tag = $1 WHERE board_tasks_id = $2 and user_id = $3 RETURNING *",
+            [data.tag, data.board_tasks_id, data.userId]);
 
         if(result.rows[0]) return result.rows[0];
         else throw new AppError(404, "Error");
@@ -36,8 +36,8 @@ export class ConcreteBoardRepository{
 
     async updateStatus(data:any){
         const result = await this.pool.query(
-            "UPDATE concrete_board SET status = $1 WHERE board_tasks_id = $2 RETURNING *", 
-            [data.status, data.board_tasks_id]);
+            "UPDATE concrete_board SET status = $1 WHERE board_tasks_id = $2 and user_id = $3 RETURNING *", 
+            [data.status, data.board_tasks_id, data.userId]);
 
         if(result.rows[0]) return result.rows[0];
         else throw new AppError(404, "Task not found");
@@ -45,8 +45,8 @@ export class ConcreteBoardRepository{
 
     async readStatus(data:any){
         const result = await this.pool.query(
-            "SELECT * FROM concrete_board WHERE status = $1", 
-            [data.status]);
+            "SELECT * FROM concrete_board WHERE status = $1 and user_id = $2", 
+            [data.status, data.userId]);
 
         if(result.rows[0]) return result.rows[0];
         else throw new AppError(404, "Task not found");
@@ -54,8 +54,8 @@ export class ConcreteBoardRepository{
 
     async readTag(data:any){
         const result = await this.pool.query(
-            "SELECT * FROM concrete_board WHERE tag = $1", 
-            [data.tag]);
+            "SELECT * FROM concrete_board WHERE tag = $1 and user_id = $2", 
+            [data.tag, data.userId]);
 
         if(result.rows[0]) return result.rows[0];
         else throw new AppError(404, "Task not found");

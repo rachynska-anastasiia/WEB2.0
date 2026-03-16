@@ -3,7 +3,7 @@ import {
     AddBoardDTO,
     DeleteBoardDTO,
     UpdateBoardNameDTO,
-    GetBoardByUserDTO
+    //GetBoardByUserDTO
 } from "./types";
 
 import { AppError } from "../errorHandler/service";
@@ -16,36 +16,36 @@ export class BoardsService{
         this.repository = new BoardsRepository();
     }
 
-    async AddBoard(payload:AddBoardDTO){
-        const {name,user_id} = payload;
+    async AddBoard(userId: number, payload:AddBoardDTO){
+        const {name} = payload;
 
         try{
-            return await this.repository.create({name,user_id});
+            return await this.repository.create({userId, name});
         }catch(e){
             if(e instanceof AppError) throw e;
             throw new AppError(500,"Error");
         }
     }
 
-    async GetAllBoards(){
-        return await this.repository.readAll();
-    }
-
-    async GetBoardsByUser(payload:GetBoardByUserDTO){
-        const {user_id} = payload;
-
-        return await this.repository.readByUser({user_id});
-    }
-
-    async UpdateBoardName(payload:UpdateBoardNameDTO){
-        const {id,name} = payload;
-
-        return await this.repository.updateName({id,name});
-    }
-
-    async DeleteBoard(payload:DeleteBoardDTO){
+    async DeleteBoard(userId: number, payload:DeleteBoardDTO){
         const {id} = payload;
 
-        return await this.repository.delete({id});
+        return await this.repository.delete({userId, id});
+    }
+
+    /*async GetAllBoards(){
+        return await this.repository.readAll();
+    }*/
+
+    async GetBoardsByUser(userId: number){
+        //const {user_id} = payload;
+
+        return await this.repository.readByUser({userId});
+    }
+
+    async UpdateBoardName(userId: number, payload:UpdateBoardNameDTO){
+        const {name} = payload;
+
+        return await this.repository.updateName({userId, name});
     }
 }

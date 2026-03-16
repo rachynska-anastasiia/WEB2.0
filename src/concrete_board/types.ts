@@ -1,6 +1,5 @@
 export type AddTaskToBoardDTO = {
-    user_id: BigInt;
-    task_id: BigInt;
+    task_id: number;
 }
 
 export type GetTaskOnBoardByTagDTO = {
@@ -12,15 +11,15 @@ export type GetTaskOnBoardByStatusDTO = {
 }
 
 export type UpdateTaskTagOnBoardDTO = {
-    board_tasks_id: BigInt;
+    board_tasks_id: number;
     tag: string;
 }
 
 export type UpdateTaskStatusOnBoardDTO = {
-    board_tasks_id: BigInt;
+    board_tasks_id: number;
     status: string;
 }
 
 export type DeleteTakOnBoardDTO = {
-    board_tasks_id: BigInt;
+    board_tasks_id: number;
 }

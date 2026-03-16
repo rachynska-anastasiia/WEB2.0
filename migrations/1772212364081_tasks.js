@@ -2,6 +2,7 @@ exports.up = (pgm) => {
     pgm.createType("priority", ["low", "medium", "high"]);
     pgm.createTable("tasks", {
         task_id: {type: "serial", primaryKey: true},
+        user_id: {type: "integer", notNull: true, references: '"users"', onDelete: "CASCADE"},
         title: {type: "text", notNull: true},
         description: {type: "text"},
         due_date: {type: "timestamp"},
