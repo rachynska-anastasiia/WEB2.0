@@ -1,19 +1,22 @@
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  created_at: Date;
+export type AddUserDTO = {
+    name: string;
+    email: string;
 }
 
-export interface CreateUserDto {
-  name: string;
-  email: string;
-  password: string;
+export type DeleteUserDTO = {
+    id: number;
 }
 
-export interface UpdateUserDto {
-  name?: string;
-  email?: string;
-  password?: string;
+export type UpdateUserNameDTO = {
+    id: number;
+    name: string;
+}
+
+export type UpdateUserEmailDTO = {
+    id: number;
+    email: string;
+}
+
+export type GetUserByEmailDTO = {
+    email: string;
 }

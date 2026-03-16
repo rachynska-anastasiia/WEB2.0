@@ -1,41 +1,58 @@
 import { UsersRepository } from "./repository";
+import {
+    AddUserDTO,
+    DeleteUserDTO,
+    UpdateUserNameDTO,
+    UpdateUserEmailDTO,
+    GetUserByEmailDTO
+} from "./types";
 
-export const UsersService = {
-  async getAll() {
-    return UsersRepository.findAll();
-  },
+import { AppError } from "../errorHandler/service";
 
-  async getById(id: number) {
-    const user = await UsersRepository.findById(id);
+export class UsersService{
 
-    if (!user) {
-      throw new Error("User not found");
+    private repository:any;
+
+    constructor(){
+        this.repository = new UsersRepository();
     }
 
-    return user;
-  },
+    async AddUser(payload:AddUserDTO){
+        const {name,email} = payload;
 
-  async create(data: any) {
-    return UsersRepository.create(data);
-  },
-
-  async update(id: number, data: any) {
-    const user = await UsersRepository.update(id, data);
-
-    if (!user) {
-      throw new Error("User not found");
+        try{
+            return await this.repository.create({name,email});
+        }catch(e){
+            if(e instanceof AppError) throw e;
+            throw new AppError(500,"Error");
+        }
     }
 
-    return user;
-  },
-
-  async delete(id: number) {
-    const user = await UsersRepository.delete(id);
-
-    if (!user) {
-      throw new Error("User not found");
+    async GetAllUsers(){
+        return await this.repository.readAll();
     }
 
-    return user;
-  }
-};
+    async GetUserByEmail(payload:GetUserByEmailDTO){
+        const {email} = payload;
+
+        return await this.repository.readEmail({email});
+    }
+
+    async UpdateUserName(payload:UpdateUserNameDTO){
+        const {id,name} = payload;
+
+        return await this.repository.updateName({id,name});
+    }
+
+    async UpdateUserEmail(payload:UpdateUserEmailDTO){
+        const {id,email} = payload;
+
+        return await this.repository.updateEmail({id,email});
+    }
+
+    async DeleteUser(payload:DeleteUserDTO){
+        const {id} = payload;
+
+        return await this.repository.delete({id});
+    }
+}

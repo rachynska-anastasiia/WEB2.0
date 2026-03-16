@@ -1,42 +1,51 @@
 import { BoardsRepository } from "./repository";
-import { CreateBoardDto, UpdateBoardDto } from "./types";
+import {
+    AddBoardDTO,
+    DeleteBoardDTO,
+    UpdateBoardNameDTO,
+    GetBoardByUserDTO
+} from "./types";
 
-export const BoardsService = {
-  async getAll() {
-    return BoardsRepository.findAll();
-  },
+import { AppError } from "../errorHandler/service";
 
-  async getById(id: number) {
-    const board = await BoardsRepository.findById(id);
+export class BoardsService{
 
-    if (!board) {
-      throw new Error("Board not found");
+    private repository:any;
+
+    constructor(){
+        this.repository = new BoardsRepository();
     }
 
-    return board;
-  },
+    async AddBoard(payload:AddBoardDTO){
+        const {name,user_id} = payload;
 
-  async create(data: CreateBoardDto) {
-    return BoardsRepository.create(data);
-  },
-
-  async update(id: number, data: UpdateBoardDto) {
-    const board = await BoardsRepository.update(id, data);
-
-    if (!board) {
-      throw new Error("Board not found");
+        try{
+            return await this.repository.create({name,user_id});
+        }catch(e){
+            if(e instanceof AppError) throw e;
+            throw new AppError(500,"Error");
+        }
     }
 
-    return board;
-  },
-
-  async delete(id: number) {
-    const board = await BoardsRepository.delete(id);
-
-    if (!board) {
-      throw new Error("Board not found");
+    async GetAllBoards(){
+        return await this.repository.readAll();
     }
 
-    return board;
-  }
-};
+    async GetBoardsByUser(payload:GetBoardByUserDTO){
+        const {user_id} = payload;
+
+        return await this.repository.readByUser({user_id});
+    }
+
+    async UpdateBoardName(payload:UpdateBoardNameDTO){
+        const {id,name} = payload;
+
+        return await this.repository.updateName({id,name});
+    }
+
+    async DeleteBoard(payload:DeleteBoardDTO){
+        const {id} = payload;
+
+        return await this.repository.delete({id});
+    }
+}

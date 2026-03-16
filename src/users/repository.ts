@@ -1,53 +1,68 @@
 import { pool } from "../db";
-import { CreateUserDto, UpdateUserDto } from "./types";
+import { AppError } from "../errorHandler/service";
 
-export const UsersRepository = {
-  async findAll() {
-    const result = await pool.query("SELECT * FROM users ORDER BY id");
-    return result.rows;
-  },
+export class UsersRepository {
 
-  async findById(id: number) {
-    const result = await pool.query(
-      "SELECT * FROM users WHERE id = $1",
-      [id]
-    );
-    return result.rows[0];
-  },
+    private pool: any;
 
-  async create(data: CreateUserDto) {
-    const { name, email, password } = data;
+    constructor(){
+        this.pool = pool;
+    }
 
-    const result = await pool.query(
-      `INSERT INTO users (name, email, password)
-       VALUES ($1, $2, $3)
-       RETURNING *`,
-      [name, email, password]
-    );
+    async create(data:any){
+        const result = await this.pool.query(
+            "INSERT INTO users (name,email) VALUES ($1,$2) RETURNING *",
+            [data.name, data.email]
+        );
 
-    return result.rows[0];
-  },
+        return result.rows[0];
+    }
 
-  async update(id: number, data: UpdateUserDto) {
-    const { name, email, password } = data;
+    async delete(data:any){
+        const result = await this.pool.query(
+            "DELETE FROM users WHERE id = $1 RETURNING *",
+            [data.id]
+        );
 
-    const result = await pool.query(
-      `UPDATE users
-       SET name = $1, email = $2, password = $3
-       WHERE id = $4
-       RETURNING *`,
-      [name, email, password, id]
-    );
+        if(result.rows[0]) return result.rows[0];
+        else throw new AppError(404,"User not found");
+    }
 
-    return result.rows[0];
-  },
+    async updateName(data:any){
+        const result = await this.pool.query(
+            "UPDATE users SET name = $1 WHERE id = $2 RETURNING *",
+            [data.name, data.id]
+        );
 
-  async delete(id: number) {
-    const result = await pool.query(
-      `DELETE FROM users WHERE id = $1 RETURNING *`,
-      [id]
-    );
+        if(result.rows[0]) return result.rows[0];
+        else throw new AppError(404,"User not found");
+    }
 
-    return result.rows[0];
-  }
-};
+    async updateEmail(data:any){
+        const result = await this.pool.query(
+            "UPDATE users SET email = $1 WHERE id = $2 RETURNING *",
+            [data.email, data.id]
+        );
+
+        if(result.rows[0]) return result.rows[0];
+        else throw new AppError(404,"User not found");
+    }
+
+    async readAll(){
+        const result = await this.pool.query(
+            "SELECT * FROM users"
+        );
+
+        return result.rows;
+    }
+
+    async readEmail(data:any){
+        const result = await this.pool.query(
+            "SELECT * FROM users WHERE email = $1",
+            [data.email]
+        );
+
+        if(result.rows[0]) return result.rows[0];
+        else throw new AppError(404,"User not found");
+    }
+}

@@ -1,34 +1,37 @@
 import { Router } from "express";
 import { UsersService } from "./service";
+import { AppError } from "../errorHandler/service";
 
-const router = Router();
+export const userRoutes = Router();
+const service = new UsersService();
 
-router.get("/", async (req, res) => {
-  const users = await UsersService.getAll();
-  res.json(users);
+userRoutes.get("/GetAllUsers", async(req,res)=>{
+    const result = await service.GetAllUsers();
+    return res.status(200).json(result);
 });
 
-router.get("/:id", async (req, res) => {
-  const id = Number(req.params.id);
-  const user = await UsersService.getById(id);
-  res.json(user);
+userRoutes.post("/AddUser", async(req,res)=>{
+    const {name,email} = req.body;
+
+    if(!name) throw new AppError(401,"Name required");
+    if(!email) throw new AppError(401,"Email required");
+
+    const result = await service.AddUser({name,email});
+    return res.status(200).json(result);
 });
 
-router.post("/", async (req, res) => {
-  const user = await UsersService.create(req.body);
-  res.status(201).json(user);
+userRoutes.get("/GetUserByEmail/:email", async(req,res)=>{
+    const email = req.params.email;
+
+    const result = await service.GetUserByEmail({email});
+    return res.status(200).json(result);
 });
 
-router.put("/:id", async (req, res) => {
-  const id = Number(req.params.id);
-  const user = await UsersService.update(id, req.body);
-  res.json(user);
+userRoutes.delete("/DeleteUser", async(req,res)=>{
+    const {id} = req.body;
+
+    const result = await service.DeleteUser({id});
+    return res.status(200).json(result);
 });
 
-router.delete("/:id", async (req, res) => {
-  const id = Number(req.params.id);
-  const user = await UsersService.delete(id);
-  res.json(user);
-});
-
-export default router;
+export default userRoutes

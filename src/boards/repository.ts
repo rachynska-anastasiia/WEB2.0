@@ -1,53 +1,57 @@
 import { pool } from "../db";
-import { CreateBoardDto, UpdateBoardDto } from "./types";
+import { AppError } from "../errorHandler/service";
 
-export const BoardsRepository = {
-  async findAll() {
-    const result = await pool.query("SELECT * FROM boards ORDER BY id");
-    return result.rows;
-  },
+export class BoardsRepository{
 
-  async findById(id: number) {
-    const result = await pool.query(
-      "SELECT * FROM boards WHERE id = $1",
-      [id]
-    );
-    return result.rows[0];
-  },
+    private pool:any;
 
-  async create(data: CreateBoardDto) {
-    const { name, user_id } = data;
+    constructor(){
+        this.pool = pool;
+    }
 
-    const result = await pool.query(
-      `INSERT INTO boards (name, user_id)
-       VALUES ($1, $2)
-       RETURNING *`,
-      [name, user_id]
-    );
+    async create(data:any){
+        const result = await this.pool.query(
+            "INSERT INTO boards (name,user_id) VALUES ($1,$2) RETURNING *",
+            [data.name,data.user_id]
+        );
 
-    return result.rows[0];
-  },
+        return result.rows[0];
+    }
 
-  async update(id: number, data: UpdateBoardDto) {
-    const { name } = data;
+    async delete(data:any){
+        const result = await this.pool.query(
+            "DELETE FROM boards WHERE id = $1 RETURNING *",
+            [data.id]
+        );
 
-    const result = await pool.query(
-      `UPDATE boards
-       SET name = $1
-       WHERE id = $2
-       RETURNING *`,
-      [name, id]
-    );
+        if(result.rows[0]) return result.rows[0];
+        else throw new AppError(404,"Board not found");
+    }
 
-    return result.rows[0];
-  },
+    async updateName(data:any){
+        const result = await this.pool.query(
+            "UPDATE boards SET name = $1 WHERE id = $2 RETURNING *",
+            [data.name,data.id]
+        );
 
-  async delete(id: number) {
-    const result = await pool.query(
-      `DELETE FROM boards WHERE id = $1 RETURNING *`,
-      [id]
-    );
+        if(result.rows[0]) return result.rows[0];
+        else throw new AppError(404,"Board not found");
+    }
 
-    return result.rows[0];
-  }
-};
+    async readAll(){
+        const result = await this.pool.query(
+            "SELECT * FROM boards"
+        );
+
+        return result.rows;
+    }
+
+    async readByUser(data:any){
+        const result = await this.pool.query(
+            "SELECT * FROM boards WHERE user_id = $1",
+            [data.user_id]
+        );
+
+        return result.rows;
+    }
+}

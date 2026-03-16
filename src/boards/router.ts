@@ -1,39 +1,30 @@
 import { Router } from "express";
 import { BoardsService } from "./service";
+import { AppError } from "../errorHandler/service";
 
-const router = Router();
+export const boardRoutes = Router();
+const service = new BoardsService();
 
-// GET all boards
-router.get("/", async (req, res) => {
-  const boards = await BoardsService.getAll();
-  res.json(boards);
+boardRoutes.get("/GetAllBoards", async(req,res)=>{
+    const result = await service.GetAllBoards();
+    return res.status(200).json(result);
 });
 
-// GET board by id
-router.get("/:id", async (req, res) => {
-  const id = Number(req.params.id);
-  const board = await BoardsService.getById(id);
-  res.json(board);
+boardRoutes.post("/AddBoard", async(req,res)=>{
+    const {name,user_id} = req.body;
+
+    if(!name) throw new AppError(401,"Name required");
+    if(!user_id) throw new AppError(401,"user_id required");
+
+    const result = await service.AddBoard({name,user_id});
+    return res.status(200).json(result);
 });
 
-// CREATE board
-router.post("/", async (req, res) => {
-  const board = await BoardsService.create(req.body);
-  res.status(201).json(board);
+boardRoutes.delete("/DeleteBoard", async(req,res)=>{
+    const {id} = req.body;
+
+    const result = await service.DeleteBoard({id});
+    return res.status(200).json(result);
 });
 
-// UPDATE board
-router.put("/:id", async (req, res) => {
-  const id = Number(req.params.id);
-  const board = await BoardsService.update(id, req.body);
-  res.json(board);
-});
-
-// DELETE board
-router.delete("/:id", async (req, res) => {
-  const id = Number(req.params.id);
-  const board = await BoardsService.delete(id);
-  res.json(board);
-});
-
-export default router;
+export default boardRoutes

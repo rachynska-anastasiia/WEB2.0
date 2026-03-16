@@ -1,15 +1,17 @@
-export interface Board {
-  id: number;
-  name: string;
-  user_id: number;
-  created_at: Date;
+export type AddBoardDTO = {
+    name: string;
+    user_id: number;
 }
 
-export interface CreateBoardDto {
-  name: string;
-  user_id: number;
+export type DeleteBoardDTO = {
+    id: number;
 }
 
-export interface UpdateBoardDto {
-  name?: string;
+export type UpdateBoardNameDTO = {
+    id: number;
+    name: string;
+}
+
+export type GetBoardByUserDTO = {
+    user_id: number;
 }
