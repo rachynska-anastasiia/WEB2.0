@@ -65,4 +65,13 @@ export class UsersRepository {
         if(result.rows[0]) return result.rows[0];
         else throw new AppError(404,"User not found");
     }
+
+   async getById({ id }: { id: number }) {
+    const result = await this.pool.query(
+        "SELECT * FROM users WHERE id = $1",
+        [id]
+    );
+
+    return result.rows[0];
+}
 }
