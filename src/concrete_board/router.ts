@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { Request, Response } from "express";
-//import { AuthRequest } from "../middleware/auth";
 import { ConcreteBoardService } from "./service";
 import { AppError } from "../errorHandler/service";
 

@@ -31,7 +31,7 @@ export class UsersRepository {
     async updateName(data:any){
         const result = await this.pool.query(
             "UPDATE users SET name = $1 WHERE id = $2 RETURNING *",
-            [data.name, data.id]
+            [data.name, data.userId]
         );
 
         if(result.rows[0]) return result.rows[0];
@@ -41,19 +41,11 @@ export class UsersRepository {
     async updateEmail(data:any){
         const result = await this.pool.query(
             "UPDATE users SET email = $1 WHERE id = $2 RETURNING *",
-            [data.email, data.id]
+            [data.email, data.userId]
         );
 
         if(result.rows[0]) return result.rows[0];
         else throw new AppError(404,"User not found");
-    }
-
-    async readAll(){
-        const result = await this.pool.query(
-            "SELECT * FROM users"
-        );
-
-        return result.rows;
     }
 
     async readEmail(data:any){
@@ -73,5 +65,14 @@ export class UsersRepository {
     );
 
     return result.rows[0];
-}
+
+    }
+/*
+    async readAll(){
+        const result = await this.pool.query(
+            "SELECT * FROM users"
+        );
+
+        return result.rows;
+    }*/
 }

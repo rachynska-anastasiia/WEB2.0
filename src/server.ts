@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 //routers
-app.use("/users", authMiddleware, usersRoutes);
+app.use("/users", usersRoutes);
 app.use("/boards", authMiddleware, boardsRoutes);
 app.use("/concrete_board", authMiddleware, todoRoutes);
 app.use("/tasks", authMiddleware, taskRoutes);

@@ -4,16 +4,16 @@ export type AddUserDTO = {
 }
 
 export type DeleteUserDTO = {
-    id: number;
+    userId: number;
 }
 
 export type UpdateUserNameDTO = {
-    id: number;
+    //userId: number;
     name: string;
 }
 
 export type UpdateUserEmailDTO = {
-    id: number;
+    //userId: number;
     email: string;
 }
 

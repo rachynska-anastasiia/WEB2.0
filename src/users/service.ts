@@ -30,32 +30,46 @@ export class UsersService {
             throw new AppError(500, "Error");
         }
     }
-
-    async GetAllUsers() {
-        return await this.repository.readAll();
-    }
-
+/*
     async GetUserByEmail(payload: GetUserByEmailDTO) {
         const { email } = payload;
         return await this.repository.readEmail({ email });
+    }*/
+
+    async GetUserByEmail(payload: GetUserByEmailDTO) {
+        const { email } = payload;
+        const user = await this.repository.readEmail({ email });
+        if (!user) {
+            throw new AppError(404, "User not found");
+        }
+
+        const token = jwt.sign(
+            { userId: user.id },
+            SECRET,
+            { expiresIn: "1h" }
+        );
+
+        return { token };
     }
 
-    async UpdateUserName(payload: UpdateUserNameDTO) {
-        const { id, name } = payload;
-        return await this.repository.updateName({ id, name });
+
+    async UpdateUserName(userId: number, payload: UpdateUserNameDTO) {
+        const { name } = payload;
+        return await this.repository.updateName({ userId, name });
     }
 
-    async UpdateUserEmail(payload: UpdateUserEmailDTO) {
-        const { id, email } = payload;
-        return await this.repository.updateEmail({ id, email });
+    async UpdateUserEmail(userId: number, payload: UpdateUserEmailDTO) {
+        const { email } = payload;
+        return await this.repository.updateEmail({ userId, email });
     }
 
     async DeleteUser(payload: DeleteUserDTO) {
-        const { id } = payload;
-        return await this.repository.delete({ id });
+        const { userId } = payload;
+        return await this.repository.delete({ userId });
     }
 
-
+    
+/*
     async Login({ id }: { id: number }) {
 
         const user = await this.repository.getById({ id });
@@ -71,5 +85,9 @@ export class UsersService {
         );
 
         return { token };
-    }
+    }*/
+/*
+    async GetAllUsers() {
+        return await this.repository.readAll();
+    }*/
 }

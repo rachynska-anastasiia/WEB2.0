@@ -10,7 +10,7 @@ export class ConcreteBoardRepository{
     async create(data:any){
         const result = await this.pool.query(
             "INSERT INTO concrete_board (user_id , task_id) VALUES ($1, $2) RETURNING *", 
-            [data.user_id, data.task_id]);
+            [data.userId, data.task_id]);
 
         if(result.rows[0]) return result.rows[0];
         else throw new AppError(404, "Error");
