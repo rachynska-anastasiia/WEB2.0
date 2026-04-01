@@ -1,14 +1,20 @@
+//server.ts
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 
+import { connect } from "./mq/rabbit";
 
 import usersRoutes from "./users/router";
 import boardsRoutes from "./boards/router";
 import todoRoutes from "./concrete_board/router";
 import taskRoutes from "./tasks/router";
+import jobsRoutes from "./jobs/router";
 import { errorHandler } from "./errorHandler/service";
 import { authMiddleware } from "./middleware/auth";
 //import {Request, Response} from "express";
+
+dotenv.config();
 
 const app = express();
 
@@ -21,14 +27,22 @@ app.use("/users", usersRoutes);
 app.use("/boards", authMiddleware, boardsRoutes);
 app.use("/concrete_board", authMiddleware, todoRoutes);
 app.use("/tasks", authMiddleware, taskRoutes);
+app.use("/jobs", authMiddleware, jobsRoutes);
 
 app.use(errorHandler);
 
+const startServer = async () => {
+    try{
+        await connect();
+        app.listen(3000, () => {
+            console.log("Server is running on port 3000");
+        });
+    } catch (error) {
+        console.error('Failed to connect to RabbitMQ:', error);
+    }
+}
 
-app.listen(3000, () => {
-    console.log("Server is running on port 3000");
-});
-
+startServer();
 
 
 

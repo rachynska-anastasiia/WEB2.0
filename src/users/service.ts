@@ -52,7 +52,6 @@ export class UsersService {
         return { token };
     }
 
-
     async UpdateUserName(userId: number, payload: UpdateUserNameDTO) {
         const { name } = payload;
         return await this.repository.updateName({ userId, name });
