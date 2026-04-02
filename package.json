@@ -10,7 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate:up": "node-pg-migrate up -m ./migrations",
     "migrate:down": "node-pg-migrate down -m ./migrations",
-    "migrate:create": "node-pg-migrate create -m ./migrations"
+    "migrate:create": "node-pg-migrate create -m ./migrations",
+    "worker:transcription": "ts-node src/workers/transcription.worker.ts"
   },
   "keywords": [],
   "author": "",
