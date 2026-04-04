@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import { connect } from "./mq/rabbit";
+import { startJobsEventsConsumer } from "./jobs/events.consumer";
 
 import usersRoutes from "./users/router";
 import boardsRoutes from "./boards/router";
@@ -34,6 +35,7 @@ app.use(errorHandler);
 const startServer = async () => {
     try{
         await connect();
+        await startJobsEventsConsumer();
         app.listen(3000, () => {
             console.log("Server is running on port 3000");
         });

@@ -1,7 +1,9 @@
 import amqp from "amqplib";
+import dotenv from "dotenv";
 import { pool } from "../db";
 
 const QUEUE = "transcription.request";
+dotenv.config();
 
 const startWorker = async () => {
 

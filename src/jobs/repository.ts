@@ -1,5 +1,6 @@
 import { pool } from "../db";
 import { AppError } from "../errorHandler/service";
+import { JobEvent } from "./types";
 
 export class JobsRepository{
     private pool: typeof pool;
@@ -31,6 +32,50 @@ export class JobsRepository{
             "SELECT * FROM jobs WHERE user_id = $1 AND idempotency_key = $2",
             [data.userId, data.idempotency_key]
         );
-        return result.rows[0] ?? null;
+        if(result.rows[0]) return result.rows[0];
+        return null;
+    }
+
+    async updateJobStatus(id:number, data:Partial<{status: string, result: any, error: string}>, userId: number){
+        const result = await this.pool.query(
+            `UPDATE jobs SET status = COALESCE($1, status),
+            result = COALESCE($2, result),
+            error = COALESCE($3, error),
+            updated_at = CURRENT_TIMESTAMP
+            WHERE id = $4 AND user_id = $5 RETURNING *
+            `,[data.status, data.result, data.error, id, userId]
+        );
+        if(result.rows[0]) return result.rows[0];
+        else throw new AppError(404, "Job not found");
+    }
+
+    async handleEvent(event: JobEvent, userId:number){
+        if(event.eventType == "job.progress")
+            return this.updateJobStatus(event.jobId, {status: 'PROCESSING'}, userId);
+        
+        if(event.eventType == "job.completed")
+            return this.updateJobStatus(event.jobId, {status: 'DONE', result: JSON.stringify(event.result)}, userId);
+        
+        if(event.eventType == "job.failed")
+            return this.updateJobStatus(event.jobId, {status: 'ERROR', error: event.error.message}, userId);
+    }
+
+    async getUserIdByJobId(jobId: any){
+        const result = await this.pool.query(
+            "SELECT user_id FROM jobs WHERE id = $1",
+            [jobId]
+        );
+        if(!result.rows[0]) return null;
+        return result.rows[0].user_id;
     }
 }
+
+
+/* async getUserIdByJobId(jobId: any){
+        const result = await this.pool.query(
+            "SELECT user_id FROM jobs WHERE id = $1",
+            [jobId]
+        );
+        if(!result.rows[0]) return null;
+        return result.rows[0].user_id;
+    } */

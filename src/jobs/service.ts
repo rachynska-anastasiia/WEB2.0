@@ -1,5 +1,6 @@
 import{
     CreateJobDTO,
+    JobRequestedEventDTO
 } from './types';
 import { JobsRepository } from "./repository";
 import { AppError } from '../errorHandler/service';
@@ -12,14 +13,17 @@ export class JobsService{
         this.repository = new JobsRepository();
     }
 
-    async createTranscriptionJob(userId: number, data: CreateJobDTO){
+    async createJob(userId: number, data: CreateJobDTO){
         const {idempotency_key, title} = data;
         const job = await this.repository.findJobByUserIdAndIdempotencyKey({userId, idempotency_key});
-        if(job){
-            return job;
-        }
+        if(job) return job;
         const newJob = await this.repository.createJob({userId, idempotency_key, title});
-        await publishRequest(newJob.id, newJob.title);
+        const event: JobRequestedEventDTO = {
+            eventType: "job.requested", timestamp: new Date().toISOString(),
+            jobId: newJob.id, jobType: "task_stats",
+            payload: { title: newJob.title }
+        };
+        await publishRequest(event);
         return newJob;
     }
 

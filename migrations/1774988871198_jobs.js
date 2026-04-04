@@ -2,8 +2,8 @@ exports.up = (pgm) => {
     pgm.createTable("jobs", {
         id: 'id',
         user_id: {type: "integer", notNull: true, references: '"users"', onDelete: "CASCADE"},
-        title: {type: "jsonb", notNull: true},
-        status: {type: 'varchar(20)', notNull: true, default:'QUEUED', check: "status IN ('QUEUED', 'PROCESSING', 'DONE', 'FAILED')"},
+        title: { type: "text", notNull: true },
+        status: {type: 'varchar(20)', notNull: true, default:'CREATED', check: "status IN ('CREATED', 'PROCESSING', 'DONE', 'ERROR')"},
         idempotency_key: { type: 'varchar(255)', notNull: true },
         result: { type: 'text' },
         error: { type: 'text' },

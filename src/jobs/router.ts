@@ -6,16 +6,14 @@ import { AppError } from "../errorHandler/service";
 export const jobsRoutes = Router();
 const service = new JobsService();
 
-jobsRoutes.post("/createTranscription", async (req: Request, res: Response) => {
+jobsRoutes.post("/createJob", async (req: Request, res: Response) => {
     const userId = req.user!.userId;
     const {title, idempotency_key} = req.body;
-    if (!title) {
-        throw new AppError(401, "title is required");
-    }
-    if(!idempotency_key){
-        throw new AppError(401, "Idempotency key is required");
-    }
-    const result = await service.createTranscriptionJob(userId, {idempotency_key, title});
+
+    if (!title) throw new AppError(401, "title is required");
+    if(!idempotency_key) throw new AppError(401, "Idempotency key is required");
+
+    const result = await service.createJob(userId, {idempotency_key, title});
     return res.status(202).json(result);
 });
 
