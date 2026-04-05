@@ -44,8 +44,8 @@ export class BoardsService{
     }
 
     async UpdateBoardName(userId: number, payload:UpdateBoardNameDTO){
-        const {name} = payload;
+        const {id, name} = payload;
 
-        return await this.repository.updateName({userId, name});
+        return await this.repository.updateName({userId, id, name});
     }
 }

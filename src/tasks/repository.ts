@@ -82,7 +82,7 @@ export class TasksRepository{
             "SELECT * FROM tasks WHERE priority = $1 AND user_id = $2", 
             [data.priority, data.userId]);
 
-        if(result.rows[0]) return result.rows[0];
+        if(result.lenght > 0) return result;
         else throw new AppError(404, "Error");
     }
 }

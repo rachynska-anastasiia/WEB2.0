@@ -55,8 +55,7 @@ export class TasksService{
         } catch(e){
             if (e instanceof AppError) throw e;
             throw new AppError(500, "Error");
-        }
-        
+        }       
     }
 
     async GetTaskByPriority(userId: number, payload: GetTaskByPriorityDTO){

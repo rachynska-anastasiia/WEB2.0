@@ -34,9 +34,9 @@ boardRoutes.get("/GetBoardsByUser", async(req,res)=>{
 
 boardRoutes.put("/UpdateBoardName", async(req,res)=>{
     const userId = req.user!.userId;
-    const {name} = req.body;
+    const {id, name} = req.body;
 
-    const result = await service.UpdateBoardName(userId, {name});
+    const result = await service.UpdateBoardName(userId, {id, name});
     return res.status(200).json(result);
 });
 

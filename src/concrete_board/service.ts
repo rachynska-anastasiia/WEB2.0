@@ -28,8 +28,9 @@ export class ConcreteBoardService{
         const {task_id} = payload;
         
         try {
-            return this.repository.create({userId, task_id});
+            return await this.repository.create({userId, task_id});
         } catch(e){
+            if (e instanceof AppError) throw e;
             throw new AppError(500, "Error")
         }
         
@@ -37,8 +38,9 @@ export class ConcreteBoardService{
 
     async GetAllTasksOnBoard(){
         try {
-            return this.repository.readAll();
+            return await this.repository.readAll();
         } catch(e){
+            if (e instanceof AppError) throw e;
             throw new AppError(500, "Error")
         }
     }
@@ -47,8 +49,9 @@ export class ConcreteBoardService{
         const {tag} = payload;
         
         try {
-            return this.repository.readTag({userId, tag});
+            return await this.repository.readTag({userId, tag});
         } catch(e){
+            if (e instanceof AppError) throw e;
             throw new AppError(500, "Error")
         }
         
@@ -58,8 +61,9 @@ export class ConcreteBoardService{
         const {status} = payload;
         
         try {
-            return this.repository.readStatus({userId, status});
+            return await this.repository.readStatus({userId, status});
         } catch(e){
+            if (e instanceof AppError) throw e;
             throw new AppError(500, "Error")
         }
         
@@ -69,8 +73,9 @@ export class ConcreteBoardService{
         const {board_tasks_id, tag} = payload;
         
         try {
-            return this.repository.updateTag({userId, board_tasks_id, tag});
+            return await this.repository.updateTag({userId, board_tasks_id, tag});
         } catch(e){
+            if (e instanceof AppError) throw e;
             throw new AppError(500, "Error")
         }
         
@@ -80,8 +85,9 @@ export class ConcreteBoardService{
         const {board_tasks_id, status} = payload;
         
         try {
-            return this.repository.updateStatus({userId, board_tasks_id, status});
+            return await this.repository.updateStatus({userId, board_tasks_id, status});
         } catch(e){
+            if (e instanceof AppError) throw e;
             throw new AppError(500, "Error")
         }
         
@@ -91,8 +97,9 @@ export class ConcreteBoardService{
         const {board_tasks_id} = payload;
         
         try {
-            return this.repository.delete({userId, board_tasks_id});
+            return await this.repository.delete({userId, board_tasks_id});
         } catch(e){
+            if (e instanceof AppError) throw e;
             throw new AppError(500, "Error")
         }
         

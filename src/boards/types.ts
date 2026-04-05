@@ -8,7 +8,7 @@ export type DeleteBoardDTO = {
 }
 
 export type UpdateBoardNameDTO = {
-    //id: number;
+    id: number;
     name: string;
 }
 /*

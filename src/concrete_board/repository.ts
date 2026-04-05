@@ -57,7 +57,7 @@ export class ConcreteBoardRepository{
             "SELECT * FROM concrete_board WHERE tag = $1 and user_id = $2", 
             [data.tag, data.userId]);
 
-        if(result.rows[0]) return result.rows[0];
+        if(result) return result;
         else throw new AppError(404, "Task not found");
     }
 
