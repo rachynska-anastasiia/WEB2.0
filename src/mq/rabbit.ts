@@ -3,8 +3,8 @@ import  { JobRequestedEventDTO } from '../jobs/types';
 
 let channel: Channel | undefined;
 
-const REQUEST_QUEUE = 'job.transcription.request';
-const EVENTS_QUEUE = 'transcription.events';
+const REQUEST_QUEUE = 'job.request';
+const EVENTS_QUEUE = 'job.events';
 
 export const connect = async () => {
     try{

@@ -1,7 +1,7 @@
 import amqp from "amqplib";
 import { pool } from "../db";
 
-const QUEUE = "transcription.events";
+const QUEUE = "job.events";
 
 export const startEventsConsumer = async () => {
     const connection = await amqp.connect(process.env.RABBITMQ_URL as string);

@@ -15,7 +15,6 @@ export type JobProgressEventDTO = {
     eventType: "job.progress";
     timestamp: string;
     jobId:number;
-    message?: string;
 }
 
 export type JobCompletedEventDTO = {
