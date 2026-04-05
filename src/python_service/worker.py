@@ -1,16 +1,11 @@
 import pika
 import json
-import os
 import time
-from datetime import datetime, timezone
+import random
 
-RABBIT_URL = os.environ.get("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
-REQUEST_QUEUE = "job.request"
-EVENT_QUEUE = "job.events"
-
-
-def now_time():
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+RABBIT_URL = "amqp://guest:guest@localhost:5672/"
+REQUEST_QUEUE = "transcription.request"
+EVENT_QUEUE = "transcription.events"
 
 
 def connect():
@@ -23,6 +18,21 @@ def connect():
 
     return connection, channel
 
+
+def heavy_report_generation():
+    tasks = [random.choice(["todo", "in_progress", "done"]) for _ in range(1_000_000)]
+
+    total = len(tasks)
+    done = tasks.count("done")
+    in_progress = tasks.count("in_progress")
+    todo = tasks.count("todo")
+
+    return {
+        "total": total,
+        "done": done,
+        "in_progress": in_progress,
+        "todo": todo
+    }
 
 def publish_event(channel, event):
     channel.basic_publish(
@@ -41,27 +51,23 @@ def handle_message(ch, method, properties, body):
 
     try:
         publish_event(ch, {
-            "eventType": "job.progress",
             "jobId": job_id,
-            "timestamp": now_time()
+            "status": "PROCESSING"
         })
 
-        # heavy-processing
-        time.sleep(5)
+        result = heavy_report_generation()
 
         publish_event(ch, {
-            "eventType": "job.completed",
             "jobId": job_id,
-            "timestamp": now_time(),
-            "result": "Processed by Python service"
+            "status": "DONE",
+            "result": result
         })
 
     except Exception as e:
         publish_event(ch, {
-            "eventType": "job.failed",
             "jobId": job_id,
-            "timestamp": now_time(),
-            "error": {"message": str(e)}
+            "status": "FAILED",
+            "error": str(e)
         })
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
