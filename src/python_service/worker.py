@@ -2,10 +2,15 @@ import pika
 import json
 import time
 import random
+import os
+from datetime import datetime, timezone
 
-RABBIT_URL = "amqp://guest:guest@localhost:5672/"
-REQUEST_QUEUE = "transcription.request"
-EVENT_QUEUE = "transcription.events"
+RABBIT_URL = os.environ.get("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
+REQUEST_QUEUE = "job.request"
+EVENT_QUEUE = "job.events"
+
+def now_time():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
 
 def connect():
@@ -51,23 +56,26 @@ def handle_message(ch, method, properties, body):
 
     try:
         publish_event(ch, {
+            "eventType": "job.progress",
+            "timestamp": now_time(),
             "jobId": job_id,
-            "status": "PROCESSING"
         })
 
         result = heavy_report_generation()
 
         publish_event(ch, {
+            "eventType": "job.completed",
+            "timestamp": now_time(),
             "jobId": job_id,
-            "status": "DONE",
             "result": result
         })
 
     except Exception as e:
         publish_event(ch, {
+            "eventType": "job.failed",
+            "timestamp": now_time(),
             "jobId": job_id,
-            "status": "FAILED",
-            "error": str(e)
+            "error": {"message": str(e)}
         })
 
     ch.basic_ack(delivery_tag=method.delivery_tag)

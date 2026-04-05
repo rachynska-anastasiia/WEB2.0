@@ -1,4 +1,9 @@
 node_modules/
-tests/
 dist/
 .env
+coverage/
+
+# Локальне тестування (не в репозиторії)
+tests/
+jest.config.cjs
+tsconfig.test.json
