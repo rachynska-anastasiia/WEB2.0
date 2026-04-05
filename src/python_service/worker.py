@@ -1,0 +1,75 @@
+import pika
+import json
+import time
+
+RABBIT_URL = "amqp://guest:guest@localhost:5672/"
+REQUEST_QUEUE = "transcription.request"
+EVENT_QUEUE = "transcription.events"
+
+
+def connect():
+    params = pika.URLParameters(RABBIT_URL)
+    connection = pika.BlockingConnection(params)
+    channel = connection.channel()
+
+    channel.queue_declare(queue=REQUEST_QUEUE, durable=True)
+    channel.queue_declare(queue=EVENT_QUEUE, durable=True)
+
+    return connection, channel
+
+
+def publish_event(channel, event):
+    channel.basic_publish(
+        exchange='',
+        routing_key=EVENT_QUEUE,
+        body=json.dumps(event),
+        properties=pika.BasicProperties(delivery_mode=2)
+    )
+
+
+def handle_message(ch, method, properties, body):
+    data = json.loads(body)
+    job_id = data["jobId"]
+
+    print(f"Processing job {job_id}")
+
+    try:
+        publish_event(ch, {
+            "jobId": job_id,
+            "status": "PROCESSING"
+        })
+
+        # heavy-processing
+        time.sleep(5)
+
+        publish_event(ch, {
+            "jobId": job_id,
+            "status": "DONE",
+            "result": "Processed by Python service"
+        })
+
+    except Exception as e:
+        publish_event(ch, {
+            "jobId": job_id,
+            "status": "FAILED",
+            "error": str(e)
+        })
+
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
+
+def main():
+    connection, channel = connect()
+
+    channel.basic_consume(
+        queue=REQUEST_QUEUE,
+        on_message_callback=handle_message,
+        auto_ack=False
+    )
+
+    print("Python worker started")
+    channel.start_consuming()
+
+
+if __name__ == "__main__":
+    main()
