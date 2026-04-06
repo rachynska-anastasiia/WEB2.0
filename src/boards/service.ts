@@ -29,8 +29,12 @@ export class BoardsService{
 
     async DeleteBoard(userId: number, payload:DeleteBoardDTO){
         const {id} = payload;
-
-        return await this.repository.delete({userId, id});
+        try{
+            return await this.repository.delete({userId, id});
+        }catch(e){
+            if(e instanceof AppError) throw e;
+            throw new AppError(500,"Error");
+        }
     }
 
     /*async GetAllBoards(){
@@ -39,13 +43,21 @@ export class BoardsService{
 
     async GetBoardsByUser(userId: number){
         //const {user_id} = payload;
-
-        return await this.repository.readByUser({userId});
+        try{
+            return await this.repository.readByUser({userId});
+        }catch(e){
+            if(e instanceof AppError) throw e;
+            throw new AppError(500,"Error");
+        } 
     }
 
     async UpdateBoardName(userId: number, payload:UpdateBoardNameDTO){
         const {id, name} = payload;
-
-        return await this.repository.updateName({userId, id, name});
+        try{
+            return await this.repository.updateName({userId, id, name});
+        }catch(e){
+            if(e instanceof AppError) throw e;
+            throw new AppError(500,"Error");
+        } 
     }
 }

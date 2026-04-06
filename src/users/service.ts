@@ -25,7 +25,10 @@ export class UsersService {
 
         try {
             return await this.repository.create({ name, email });
-        } catch (e) {
+        } catch (e:any) {
+            if (e.code === '23505' || e.message.includes('unique constraint')) {
+                throw new AppError(400, "User with this email already exists");
+            }
             if (e instanceof AppError) throw e;
             throw new AppError(500, "Error");
         }
@@ -54,17 +57,33 @@ export class UsersService {
 
     async UpdateUserName(userId: number, payload: UpdateUserNameDTO) {
         const { name } = payload;
-        return await this.repository.updateName({ userId, name });
+        try{
+            return await this.repository.updateName({ userId, name });
+        }catch(e){
+            if(e instanceof AppError) throw e;
+            throw new AppError(500,"Error");
+        } 
     }
 
     async UpdateUserEmail(userId: number, payload: UpdateUserEmailDTO) {
         const { email } = payload;
-        return await this.repository.updateEmail({ userId, email });
+        try{
+            return await this.repository.updateEmail({ userId, email });
+        }catch(e){
+            if(e instanceof AppError) throw e;
+            throw new AppError(500,"Error");
+        } 
     }
 
     async DeleteUser(payload: DeleteUserDTO) {
         const { userId } = payload;
-        return await this.repository.delete({ userId });
+        try{
+            return await this.repository.delete({ userId });
+        }catch(e){
+            if(e instanceof AppError) throw e;
+            throw new AppError(500,"Error");
+        } 
+        
     }
 
     
