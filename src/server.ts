@@ -8,7 +8,7 @@ import { startJobsEventsConsumer } from "./jobs/events.consumer";
 
 import usersRoutes from "./users/router";
 import boardsRoutes from "./boards/router";
-import todoRoutes from "./concrete_board/router";
+import concreteBoardRouter from "./concrete_board/router";
 import taskRoutes from "./tasks/router";
 import jobsRoutes from "./jobs/router";
 import { errorHandler } from "./errorHandler/service";
@@ -26,7 +26,7 @@ app.use(express.json());
 //routers
 app.use("/users", usersRoutes);
 app.use("/boards", authMiddleware, boardsRoutes);
-app.use("/concrete_board", authMiddleware, todoRoutes);
+app.use("/concrete_board", authMiddleware, concreteBoardRouter);
 app.use("/tasks", authMiddleware, taskRoutes);
 app.use("/jobs", authMiddleware, jobsRoutes);
 
@@ -44,7 +44,11 @@ const startServer = async () => {
     }
 }
 
-startServer();
+export default app;
+
+if (process.env.NODE_ENV !== 'test') {
+    startServer();
+}
 
 
 
