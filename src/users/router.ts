@@ -8,10 +8,6 @@ const service = new UsersService();
 
 userRoutes.post("/AddUser", async(req,res)=>{
     const {name,email} = req.body;
-
-    if(!name) throw new AppError(400,"Name required");
-    if(!email) throw new AppError(400,"Email required");
-
     const result = await service.AddUser({name,email});
     return res.status(200).json(result);
 });
@@ -19,7 +15,6 @@ userRoutes.post("/AddUser", async(req,res)=>{
 userRoutes.put("/UpdateUserName", authMiddleware, async(req,res)=>{
     const userId = req.user!.userId;
     const {name} = req.body;
-    if (!name) throw new AppError(400,"Name required");
     const result = await service.UpdateUserName(userId, {name});
     return res.status(200).json(result);
 });
@@ -27,14 +22,12 @@ userRoutes.put("/UpdateUserName", authMiddleware, async(req,res)=>{
 userRoutes.put("/UpdateUserEmail", authMiddleware, async(req,res)=>{
     const userId = req.user!.userId;
     const {email} = req.body;
-    if (!email) throw new AppError(400,"email required");
     const result = await service.UpdateUserEmail(userId, {email});
     return res.status(200).json(result);
 });
 
 userRoutes.get("/Login/:email", async(req,res)=>{
     const email = req.params.email;
-    if (!email) throw new AppError(400,"email required");
     const result = await service.GetUserByEmail({email});
     return res.status(200).json(result);
 });

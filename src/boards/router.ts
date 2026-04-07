@@ -11,8 +11,6 @@ boardRoutes.post("/AddBoard", async(req,res)=>{
     const userId = req.user!.userId;
     const {name} = req.body;
 
-    if(!name) throw new AppError(401,"Name required");
-
     const result = await service.AddBoard(userId, {name});
     return res.status(200).json(result);
 });

@@ -18,7 +18,7 @@ export class BoardsService{
 
     async AddBoard(userId: number, payload:AddBoardDTO){
         const {name} = payload;
-
+        if(!name) throw new AppError(400,"Name required");
         try{
             return await this.repository.create({userId, name});
         }catch(e){
@@ -53,6 +53,7 @@ export class BoardsService{
 
     async UpdateBoardName(userId: number, payload:UpdateBoardNameDTO){
         const {id, name} = payload;
+        if(!name) throw new AppError(400,"Name required");
         try{
             return await this.repository.updateName({userId, id, name});
         }catch(e){

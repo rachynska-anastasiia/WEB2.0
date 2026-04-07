@@ -22,7 +22,8 @@ export class UsersService {
 
     async AddUser(payload: AddUserDTO) {
         const { name, email } = payload;
-
+        if(!name) throw new AppError(400,"Name required");
+        if(!email) throw new AppError(400,"Email required");
         try {
             return await this.repository.create({ name, email });
         } catch (e:any) {
@@ -41,22 +42,28 @@ export class UsersService {
 
     async GetUserByEmail(payload: GetUserByEmailDTO) {
         const { email } = payload;
-        const user = await this.repository.readEmail({ email });
-        if (!user) {
-            throw new AppError(404, "User not found");
+        if (!email) throw new AppError(400,"email required");
+        try{
+            const user = await this.repository.readEmail({ email });
+            if (!user) throw new AppError(404, "User not found");
+
+            const token = jwt.sign(
+                { userId: user.id },
+                SECRET,
+                { expiresIn: "1h" }
+            );
+
+            return { token };
+        }catch(e){
+            if(e instanceof AppError) throw e;
+            throw new AppError(500,"Error");
         }
-
-        const token = jwt.sign(
-            { userId: user.id },
-            SECRET,
-            { expiresIn: "1h" }
-        );
-
-        return { token };
+        
     }
 
     async UpdateUserName(userId: number, payload: UpdateUserNameDTO) {
         const { name } = payload;
+        if (!name) throw new AppError(400,"Name required");
         try{
             return await this.repository.updateName({ userId, name });
         }catch(e){
@@ -67,6 +74,7 @@ export class UsersService {
 
     async UpdateUserEmail(userId: number, payload: UpdateUserEmailDTO) {
         const { email } = payload;
+        if (!email) throw new AppError(400,"email required");
         try{
             return await this.repository.updateEmail({ userId, email });
         }catch(e){

@@ -26,7 +26,7 @@ export class ConcreteBoardService{
     async addTaskToBoard(userId: number, payload: AddTaskToBoardDTO){
         //const userId = req.user?.userId;
         const {task_id} = payload;
-        
+        if(!task_id)throw new AppError(400, "No id");
         try {
             return await this.repository.create({userId, task_id});
         } catch(e){
@@ -47,7 +47,7 @@ export class ConcreteBoardService{
 
     async GetTaskOnBoardByTag(userId: number, payload: GetTaskOnBoardByTagDTO){
         const {tag} = payload;
-        
+        if (!tag) throw new AppError(400, "No tag provided");
         try {
             return await this.repository.readTag({userId, tag});
         } catch(e){
@@ -59,7 +59,7 @@ export class ConcreteBoardService{
 
     async GetTaskOnBoardByStatus(userId: number, payload: GetTaskOnBoardByStatusDTO){
         const {status} = payload;
-        
+        if (!status) throw new AppError(400, "No status provided");
         try {
             return await this.repository.readStatus({userId, status});
         } catch(e){
@@ -71,7 +71,8 @@ export class ConcreteBoardService{
 
     async updateTaskTagOnBoard(userId: number, payload: UpdateTaskTagOnBoardDTO){
         const {board_tasks_id, tag} = payload;
-        
+        if (!board_tasks_id) throw new AppError(400, "No board_tasks_id provided");
+        if (!tag) throw new AppError(400, "No tag provided");
         try {
             return await this.repository.updateTag({userId, board_tasks_id, tag});
         } catch(e){
@@ -83,7 +84,8 @@ export class ConcreteBoardService{
 
     async updateTaskStatusOnBoard(userId: number, payload: UpdateTaskStatusOnBoardDTO){
         const {board_tasks_id, status} = payload;
-        
+        if (!board_tasks_id) throw new AppError(400, "No board_tasks_id provided");
+        if (!status) throw new AppError(400, "No status provided");
         try {
             return await this.repository.updateStatus({userId, board_tasks_id, status});
         } catch(e){
@@ -95,7 +97,7 @@ export class ConcreteBoardService{
 
     async deleteTakOnBoard(userId: number, payload: DeleteTakOnBoardDTO){
         const {board_tasks_id} = payload;
-        
+        if (!board_tasks_id) throw new AppError(400, "No board_tasks_id provided");
         try {
             return await this.repository.delete({userId, board_tasks_id});
         } catch(e){
