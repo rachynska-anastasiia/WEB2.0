@@ -47,5 +47,5 @@ export const startEventsConsumer = async () => {
         { noAck: false }
     );
 
-    console.log("📡 Events consumer started");
+    console.log("Events consumer started");
 };

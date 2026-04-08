@@ -36,10 +36,9 @@ export const consumeEvents = async (
         try{
             const event = JSON.parse(message.content.toString());
             await handler(event);
-        } catch(error){
-            console.error(error);
-        } finally{
             channel!.ack(message);
+        } catch(error){
+            channel!.nack(message, false, true);
         }
     });
 };

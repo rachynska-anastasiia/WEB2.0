@@ -3,9 +3,11 @@ import json
 import time
 import random
 import os
+from dotenv import load_dotenv
 from datetime import datetime, timezone
 
-RABBIT_URL = os.environ.get("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
+load_dotenv()
+RABBIT_URL = os.getenv("RABBITMQ_URL")
 REQUEST_QUEUE = "job.request"
 EVENT_QUEUE = "job.events"
 
