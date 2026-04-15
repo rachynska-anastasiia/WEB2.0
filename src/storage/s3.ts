@@ -1,10 +1,9 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 
 const s3Client = new S3Client({
     endpoint: process.env["S3_ENDPOINT"],
     region: process.env["S3_REGION"],
-    forcePathStyle: process.env["S3_FORCE_PATH_STYLE"]  !== "false",
+    forcePathStyle: process.env["S3_FORCE_PATH_STYLE"] !== "false",
     credentials: {
         accessKeyId: process.env["S3_ACCESS_KEY_ID"] as string,
         secretAccessKey: process.env["S3_SECRET_ACCESS_KEY"] as string,
@@ -13,10 +12,37 @@ const s3Client = new S3Client({
 
 const BUCKET = process.env["S3_BUCKET"];
 
-export const fileJsong =async (key: string, data: unknown) => {
+export const fileJsong = async (key: string, data: unknown) => {
     const body = JSON.stringify(data);
-    await s3Client.send(new PutObjectCommand({
-        Bucket: BUCKET, Key: key, Body: body, ContentType: "application/json"
-    }));
-    return {bucket: BUCKET, key: key};
+
+    await s3Client.send(
+        new PutObjectCommand({
+            Bucket: BUCKET,
+            Key: key,
+            Body: body,
+            ContentType: "application/json"
+        })
+    );
+
+    return { bucket: BUCKET, key: key };
+};
+
+export const getJsonFile = async (key: string) => {
+    const response = await s3Client.send(
+        new GetObjectCommand({
+            Bucket: BUCKET,
+            Key: key,
+        })
+    );
+
+    const stream = response.Body as any;
+    const chunks: Buffer[] = [];
+
+    for await (const chunk of stream) {
+        chunks.push(chunk);
+    }
+
+    const data = Buffer.concat(chunks).toString("utf-8");
+
+    return JSON.parse(data);
 };
