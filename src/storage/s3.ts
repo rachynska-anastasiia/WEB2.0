@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import "dotenv/config";
 
 const s3Client = new S3Client({
     endpoint: process.env["S3_ENDPOINT"],
@@ -10,7 +11,7 @@ const s3Client = new S3Client({
     }
 });
 
-const BUCKET = process.env["S3_BUCKET"];
+const BUCKET = process.env["S3_BUCKET"]|| "jobs-results";
 
 export const fileJsong = async (key: string, data: unknown) => {
     const body = JSON.stringify(data);
@@ -35,7 +36,9 @@ export const getJsonFile = async (key: string) => {
         })
     );
 
+    
     const stream = response.Body as any;
+    if (!stream) throw new Error("Empty S3 body");
     const chunks: Buffer[] = [];
 
     for await (const chunk of stream) {
@@ -43,6 +46,5 @@ export const getJsonFile = async (key: string) => {
     }
 
     const data = Buffer.concat(chunks).toString("utf-8");
-
     return JSON.parse(data);
 };
