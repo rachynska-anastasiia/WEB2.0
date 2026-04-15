@@ -23,6 +23,20 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: rabbitmq
       RABBITMQ_DEFAULT_PASS: rabbitmq
+  minio:
+    image: minio/minio:latest
+    container_name: web2_minio
+    restart: always
+    ports:
+      - "9000:9000" # S3 API
+      - "9001:9001" # Web Console
+    environment:
+      MINIO_ROOT_USER: kanban_login
+      MINIO_ROOT_PASSWORD: kanban_password
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
 
 volumes:
   postgres_data:
+  minio_data:

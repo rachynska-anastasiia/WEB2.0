@@ -3,6 +3,7 @@ import json
 import time
 import random
 import os
+import boto3
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 
@@ -10,6 +11,14 @@ load_dotenv()
 RABBIT_URL = os.getenv("RABBITMQ_URL")
 REQUEST_QUEUE = "job.request"
 EVENT_QUEUE = "job.events"
+
+s3 = boto3.client(
+    "s3",
+    endpoint_url=os.getenv("S3_ENDPOINT"),
+    aws_access_key_id=os.getenv("S3_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("S3_SECRET_ACCESS_KEY"),
+    region_name=os.getenv("S3_REGION"),
+)
 
 def now_time():
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
@@ -65,11 +74,14 @@ def handle_message(ch, method, properties, body):
 
         result = heavy_report_generation()
 
+        key=f"jobs/{job_id}/{now_time()}.json";
+
+        s3.put_object(Bucket=os.getenv("S3_BUCKET"), Key=key, Body=json.dumps(result), ContentType="application/json")
         publish_event(ch, {
             "eventType": "job.completed",
             "timestamp": now_time(),
             "jobId": job_id,
-            "result": result
+            "resultLink": { "bucket": os.getenv("S3_BUCKET"), "key": key }
         })
 
     except Exception as e:

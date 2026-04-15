@@ -21,7 +21,7 @@ export type JobCompletedEventDTO = {
     eventType: "job.completed";
     timestamp: string;
     jobId:number;
-    result: unknown;
+    resultLink: { bucket: string; key: string };
 }
 
 export type JobFailedEventDTO = {

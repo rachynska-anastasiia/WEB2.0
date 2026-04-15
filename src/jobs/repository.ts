@@ -36,14 +36,14 @@ export class JobsRepository{
         return null;
     }
 
-    async updateJobStatus(id:number, data:Partial<{status: string, result: any, error: string}>, userId: number){
+    async updateJobStatus(id:number, data:Partial<{status: string, error: string, s3_key: string}>, userId: number){
         const result = await this.pool.query(
             `UPDATE jobs SET status = COALESCE($1, status),
-            result = COALESCE($2, result),
-            error = COALESCE($3, error),
-            updated_at = CURRENT_TIMESTAMP
+            error = COALESCE($2, error),
+            updated_at = CURRENT_TIMESTAMP,
+            s3_key = COALESCE($3, s3_key)   
             WHERE id = $4 AND user_id = $5 RETURNING *
-            `,[data.status, data.result, data.error, id, userId]
+            `,[data.status, data.error, data.s3_key, id, userId]
         );
         if(result.rows[0]) return result.rows[0];
         else throw new AppError(404, "Job not found");
@@ -54,7 +54,7 @@ export class JobsRepository{
             return this.updateJobStatus(event.jobId, {status: 'PROCESSING'}, userId);
         
         if(event.eventType == "job.completed")
-            return this.updateJobStatus(event.jobId, {status: 'DONE', result: JSON.stringify(event.result)}, userId);
+            return this.updateJobStatus(event.jobId, {status: 'DONE', s3_key: event.resultLink.key}, userId);
         
         if(event.eventType == "job.failed")
             return this.updateJobStatus(event.jobId, {status: 'ERROR', error: event.error.message}, userId);
