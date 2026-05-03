@@ -21,7 +21,7 @@ export class UsersRepository {
     async delete(data:any){
         const result = await this.pool.query(
             "DELETE FROM users WHERE id = $1 RETURNING *",
-            [data.id]
+            [data.userId]
         );
 
         if(result.rows[0]) return result.rows[0];

@@ -77,6 +77,7 @@ def handle_message(ch, method, properties, body):
         key=f"jobs/{job_id}/{now_time()}.json";
 
         s3.put_object(Bucket=os.getenv("S3_BUCKET"), Key=key, Body=json.dumps(result), ContentType="application/json")
+        
         publish_event(ch, {
             "eventType": "job.completed",
             "timestamp": now_time(),

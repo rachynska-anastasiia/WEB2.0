@@ -1,12 +1,16 @@
 import { Pool } from 'pg';
 
-export const pool = new Pool({
-    user: "postgres",
-    password: "postgres",
-    host: "127.0.0.1",
-    port: 5432,
-    database: "web2_db"
-});
+const connectionString = process.env.DATABASE_URL;
+
+export const pool = connectionString
+    ? new Pool({ connectionString })
+    : new Pool({
+        user: "postgres",
+        password: "postgres",
+        host: "127.0.0.1",
+        port: 5432,
+        database: "web2_db"
+    });
 
 /*
 export async function initTodo(){

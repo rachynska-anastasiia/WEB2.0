@@ -1,10 +1,12 @@
 //server.ts
+import http from "http";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
 import { connect } from "./mq/rabbit";
 import { startJobsEventsConsumer } from "./jobs/events.consumer";
+import { attachJobWebSocket } from "./realtime/wsServer";
 
 import usersRoutes from "./users/router";
 import boardsRoutes from "./boards/router";
@@ -36,8 +38,10 @@ const startServer = async () => {
     try{
         await connect();
         await startJobsEventsConsumer();
-        app.listen(3000, () => {
-            console.log("Server is running on port 3000");
+        const server = http.createServer(app);
+        attachJobWebSocket(server);
+        server.listen(3000, () => {
+            console.log("Server is running");
         });
     } catch (error) {
         console.error('Failed to connect to RabbitMQ:', error);

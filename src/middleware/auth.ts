@@ -8,17 +8,27 @@ declare module "express-serve-static-core" {
         };
     }
 }
+
+export function verifyToken(token: string): { userId: number } | null {
+    try {
+        const secret = process.env.JWT_SECRET || "supersecret";
+        const decoded = jwt.verify(token, secret) as { userId: number};
+        return decoded;
+    } catch {
+        return null;
+    }
+}
+
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
         return res.status(401).json({ message: "Unauthorized" });
     }
-    try {
-        const secret = process.env.JWT_SECRET || "supersecret";
-        const decoded = jwt.verify(token, secret) as { userId: number};
-        req.user = { userId: decoded.userId};
-        next();
-    } catch (error) {
+    
+    const decoded = verifyToken(token);
+    if (!decoded) {
         return res.status(401).json({ message: "Unauthorized" });
     }
+    req.user = { userId: decoded.userId};
+    next();
 }
