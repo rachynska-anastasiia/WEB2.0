@@ -18,6 +18,12 @@ jobsRoutes.post("/createJob", async (req: Request, res: Response) => {
     return res.status(202).json(result);
 });
 
+jobsRoutes.get("/", async (req: Request, res: Response) => {
+    const userId = req.user!.userId;
+    const rows = await service.listJobs(userId);
+    return res.status(200).json(rows);
+});
+
 jobsRoutes.get("/:id", async (req: Request, res: Response) => {
     const userId = req.user!.userId;
 

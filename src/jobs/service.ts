@@ -14,6 +14,10 @@ export class JobsService {
         this.repository = new JobsRepository();
     }
 
+    async listJobs(userId: number) {
+        return await this.repository.listJobsByUserId(userId);
+    }
+
     async createJob(userId: number, data: CreateJobDTO) {
         const { idempotency_key, title } = data;
 

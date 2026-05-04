@@ -68,6 +68,15 @@ export class JobsRepository{
         if(!result.rows[0]) return null;
         return result.rows[0].user_id;
     }
+
+    async listJobsByUserId(userId: number) {
+        const result = await this.pool.query(
+            `SELECT id, user_id, title, status, idempotency_key, error, created_at, updated_at, s3_key
+             FROM jobs WHERE user_id = $1 ORDER BY created_at DESC`,
+            [userId]
+        );
+        return result.rows;
+    }
 }
 
 
