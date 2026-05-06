@@ -14,12 +14,13 @@ export type JobRow = {
   s3_key: string | null;
 };
 
-const STATUS_UA: { status: JobStatus; title: string }[] = [
-  { status: "CREATED", title: "Створено" },
-  { status: "PROCESSING", title: "В обробці" },
-  { status: "DONE", title: "Готово" },
-  { status: "ERROR", title: "Помилка" },
-];
+function getStatusTitle(status: string): string {
+  if (status === "CREATED") return "Створено";
+  if (status === "PROCESSING") return "В обробці";
+  if (status === "DONE") return "Готово";
+  if (status === "ERROR") return "Помилка";
+  return status;
+}
 
 
 export const INITIAL_MOCK_JOBS: JobRow[] = [
@@ -84,7 +85,7 @@ export default function JobsPage() {
                   <td>{job.title}</td>
                   <td>
                     <span className={`job-status job-status--${job.status.toLowerCase()}`}>
-                      {STATUS_UA[job.status]}
+                      {getStatusTitle(job.status)}
                     </span>
                   </td>
                   <td className="jobs-table-date">{new Date(job.updated_at).toLocaleString("uk-UA")}</td>

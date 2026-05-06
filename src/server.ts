@@ -4,8 +4,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
-import { connect } from "./mq/rabbit";
-import { startJobsEventsConsumer } from "./jobs/events.consumer";
+// import { connect } from "./mq/rabbit";
+// import { startJobsEventsConsumer } from "./jobs/events.consumer";
 import { attachJobWebSocket } from "./realtime/wsServer";
 
 import usersRoutes from "./users/router";
@@ -36,8 +36,8 @@ app.use(errorHandler);
 
 const startServer = async () => {
     try{
-        await connect();
-        await startJobsEventsConsumer();
+        // await connect();
+        // await startJobsEventsConsumer();
         const server = http.createServer(app);
         attachJobWebSocket(server);
         server.listen(3000, () => {
