@@ -60,13 +60,14 @@ export class TasksRepository{
         else throw new AppError(404, "Task not found");
     }
 
-    /*async readAll(){
+    async readAllByUser(userId: number){
         const result = await this.pool.query(
-            "SELECT * FROM tasks"
+            "SELECT * FROM tasks WHERE user_id = $1 ORDER BY task_id DESC",
+            [userId]
         );
 
         return result.rows;
-    }*/
+    }
 
     async readTitle(data:any){
         const result = await this.pool.query(

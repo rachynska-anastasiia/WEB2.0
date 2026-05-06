@@ -377,6 +377,17 @@
   margin-top: 0.5rem;
 } 
 
+.tasks-create-row {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: stretch;
+}
+
+.tasks-create-row .tasks-search-input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .one-task-container {
   display: flex;
   flex-direction: column;

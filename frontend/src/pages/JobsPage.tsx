@@ -1,20 +1,8 @@
+import { type FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { createJob, getJobs, type JobRow } from "../api/jobs";
 
-export type JobStatus = "CREATED" | "PROCESSING" | "DONE" | "ERROR";
-
-export type JobRow = {
-  id: number;
-  user_id: number;
-  title: string;
-  status: JobStatus;
-  idempotency_key: string;
-  error: string | null;
-  created_at: string;
-  updated_at: string;
-  s3_key: string | null;
-};
-
-function getStatusTitle(status: string): string {
+function getStatusTitle(status: JobRow["status"]): string {
   if (status === "CREATED") return "Створено";
   if (status === "PROCESSING") return "В обробці";
   if (status === "DONE") return "Готово";
@@ -22,41 +10,39 @@ function getStatusTitle(status: string): string {
   return status;
 }
 
-
-export const INITIAL_MOCK_JOBS: JobRow[] = [
-  {
-    id: 1,
-    user_id: 1,
-    title: "Звіт по успішності тасків",
-    status: "DONE",
-    idempotency_key: "demo-1",
-    error: null,
-    created_at: "2026-05-01T10:00:00.000Z",
-    updated_at: "2026-05-01T10:02:00.000Z",
-    s3_key: "demo/report-1.json",
-  }
-];
-
-export const MOCK_JOB_RESULTS: Record<number, unknown> = {
-  1: {
-    jobType: "task_stats",
-    countsByStatus: { CREATED: 2, PROCESSING: 1, DONE: 5, ERROR: 0 },
-    generatedAt: "2026-05-01T10:02:00.000Z",
-  },
-};
-
-
 export default function JobsPage() {
-  const jobs = INITIAL_MOCK_JOBS;
+  const [jobs, setJobs] = useState<JobRow[]>([]);
+  const [title, setTitle] = useState("Звіт по успішності тасків");
+
+  async function loadJobs() {
+    setJobs(await getJobs());
+  }
+
+  useEffect(() => { void loadJobs(); }, []);
+
+  async function handleCreate(e: FormEvent) {
+    e.preventDefault();
+    const t = title.trim();
+    if (!t) return;
+    await createJob(t);
+    setTitle("Звіт по успішності тасків");
+    await loadJobs();
+  }
 
   return (
     <main className="page page-jobs">
       <h1>Звіти</h1>
 
       <section className="jobs-create">
-        <form className="jobs-create-form">
+        <form className="jobs-create-form" onSubmit={handleCreate}>
           <label className="jobs-field">
-            <input placeholder="Назва звіту" required maxLength={500} />
+            <input
+              placeholder="Назва звіту"
+              required
+              maxLength={500}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </label>
           <button type="submit" className="jobs-generate-button"> Згенерувати звіт </button>
         </form>
@@ -89,7 +75,7 @@ export default function JobsPage() {
                     </span>
                   </td>
                   <td className="jobs-table-date">{new Date(job.updated_at).toLocaleString("uk-UA")}</td>
-                  <td><Link to={`/jobs/${job.id}`} state={{ job }} className="jobs-link">Деталі</Link></td>
+                  <td><Link to={`/jobs/${job.id}`} className="jobs-link">Деталі</Link></td>
                 </tr>
               ))}
             </tbody>

@@ -37,14 +37,14 @@ export class TasksService{
         }  
     }
 
-    /*async GetAllTasks(){
+    async GetAllTasks(userId: number){
         try {
-            return await this.repository.readAll();
+            return await this.repository.readAllByUser(userId);
         } catch(e){
             if (e instanceof AppError) throw e;
             throw new AppError(500, "Error");
         }
-    }*/
+    }
 
     async GetTaskByTitle(userId: number, payload: GetTaskByTitleDTO){
         const {title} = payload;

@@ -8,10 +8,11 @@ import { AppError } from "../errorHandler/service";
 export const todoRoutes = Router();
 const service = new TasksService();
 
-/*todoRoutes.get("/GetAllTasks", async (req: Request, res: Response) => {
-    const result = await service.GetAllTasks();
+todoRoutes.get("/", async (req: Request, res: Response) => {
+    const userId = req.user!.userId;
+    const result = await service.GetAllTasks(userId);
     return res.status(200).json(result);
-});*/
+});
 
 todoRoutes.post("/addTask", async (req: Request, res: Response) => {
     const userId = req.user!.userId;
