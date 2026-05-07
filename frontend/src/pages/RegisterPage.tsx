@@ -15,6 +15,7 @@ export default function RegisterPage() {
       await registerUser(name.trim(), email.trim());
       navigate("/login");
     } catch (err) {
+      setError(err instanceof Error ? err.message : "Не вдалося зареєструватися");
       navigate("/error");
     }
   }

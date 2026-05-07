@@ -16,8 +16,9 @@ export default function JobDetailPage() {
   const [status, setStatus] = useState<JobStatus | null>(null);
   const [result, setResult] = useState<unknown>(null);
   const hasTitle = Boolean(title);
-  const hasStatus = status;
-  const hasResult = result;
+  const hasStatus = status !== null;
+  const hasResult = result !== null;
+  const resultText = hasResult ? JSON.stringify(result, null, 2) : "";
 
   useEffect(() => {
     if (!Number.isFinite(jobId) || jobId < 1) return;
@@ -49,7 +50,7 @@ export default function JobDetailPage() {
           <span className={`job-status job-status--${status.toLowerCase()}`}>{STATUS_UA[status]}</span>
         </p>
       )}
-      {hasResult && <pre className="jobs-result">{JSON.stringify(result, null, 2)}</pre>}
+      {hasResult && <pre className="jobs-result">{resultText}</pre>}
     </main>
   );
 }

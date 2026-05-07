@@ -12,26 +12,13 @@ import {
   type TaskRow,
 } from "../api/tasks";
 
-type ColumnId = "todo" | "doing" | "done";
+type ColumnId = "to_do" | "in_progress" | "completed";
 
 const COLUMNS: { id: ColumnId; title: string }[] = [
-  { id: "todo", title: "Нові" },
-  { id: "doing", title: "В роботі" },
-  { id: "done", title: "Готово" },
+  { id: "to_do", title: "Нові" },
+  { id: "in_progress", title: "В роботі" },
+  { id: "completed", title: "Готово" },
 ];
-
-function mapTaskToColumn(task: TaskRow): ColumnId {
-  if (task.status === "done") return "done";
-  if (task.status === "in_progress") return "doing";
-  if (task.status === "completed") return "done";
-  return "todo";
-}
-
-function mapColumnToStatus(columnId: ColumnId): BoardStatus {
-  if (columnId === "doing") return "in_progress";
-  if (columnId === "done") return "completed";
-  return "to_do";
-}
 
 export default function TasksPage() {
   const navigate = useNavigate();
@@ -62,6 +49,7 @@ export default function TasksPage() {
         };
       });
 
+      
       setTasks(mergedTasks);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Не вдалося завантажити таски");
@@ -76,12 +64,12 @@ export default function TasksPage() {
 
   async function handleCreateTask(e: FormEvent) {
     e.preventDefault();
-    const t = title.trim();
-    const d = description.trim();
-    if (!t || !d) return;
+    const new_title = title.trim();
+    const new_description = description.trim();
+    if (!new_title || !new_description) return;
     try {
       setError(null);
-      await createTask(t, d);
+      await createTask(new_title, new_description);
       setTitle("");
       setDescription("");
       await loadTasks();
@@ -105,13 +93,12 @@ export default function TasksPage() {
   }
 
   async function handleMoveTask(task: TaskRow, direction: "left" | "right") {
-    const currentColumn = mapTaskToColumn(task);
+    const currentColumn = task.status as ColumnId;
     const index = COLUMNS.findIndex((col) => col.id === currentColumn);
     const targetIndex = direction === "left" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= COLUMNS.length) return;
 
-    const targetColumn = COLUMNS[targetIndex].id;
-    const targetStatus = mapColumnToStatus(targetColumn);
+    const targetStatus: BoardStatus = COLUMNS[targetIndex].id;
 
     try {
       setError(null);
@@ -174,7 +161,7 @@ export default function TasksPage() {
             <h2 className="board-column-title">{col.title}</h2>
             <div className="board-column-cards">
               {visibleTasks
-                .filter((task) => mapTaskToColumn(task) === col.id)
+                .filter((task) => (task.status as ColumnId) === col.id)
                 .map((task) => (
                   <article key={task.task_id} className="task-card">
                     <h3 className="task-card-title">{task.title}</h3>
@@ -182,7 +169,7 @@ export default function TasksPage() {
                     <p className="task-card-meta">{task.description || "-"}</p>
                     <p className="task-card-meta">Пріоритет: {task.priority}</p>
                     <div className="task-card-buttons">
-                      {col.id !== "todo" && (
+                      {col.id !== "to_do" && (
                         <button
                           type="button"
                           className="task-card-button"
@@ -192,7 +179,7 @@ export default function TasksPage() {
                           ←
                         </button>
                       )}
-                      {col.id !== "done" && (
+                      {col.id !== "completed" && (
                         <button
                           type="button"
                           className="task-card-button"

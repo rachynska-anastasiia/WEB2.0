@@ -22,9 +22,9 @@ export default function JobsPage() {
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
-    const t = title.trim();
-    if (!t) return;
-    await createJob(t);
+    const new_title = title.trim();
+    if (!new_title) return;
+    await createJob(new_title);
     setTitle("Звіт по успішності тасків");
     await loadJobs();
   }
