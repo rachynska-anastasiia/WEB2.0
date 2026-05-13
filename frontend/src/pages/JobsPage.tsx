@@ -1,9 +1,17 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { createJob, getJobs, type JobRow } from "../api/jobs";
-import { JobsWebSocketClient } from "../realtime/wsClient";
+import {
+  createJob,
+  getJobs,
+  type JobRow,
+  type JobSocketMessage,
+} from "../api/jobs";
+import {
+  JobsWebSocketClient,
+  type WebSocketConnectionState,
+} from "../realtime/wsClient";
 
-type WsStateLabel = "idle" | "connecting" | "open" | "closed" | "error";
+type LiveStatus = "connected" | "reconnecting" | "offline";
 
 function getStatusTitle(status: JobRow["status"]): string {
   if (status === "CREATED") return "Створено";
@@ -13,62 +21,108 @@ function getStatusTitle(status: JobRow["status"]): string {
   return status;
 }
 
+function getLiveStatus(state: WebSocketConnectionState): LiveStatus {
+  if (state === "open") return "connected";
+  if (state === "connecting" || state === "reconnecting") return "reconnecting";
+  return "offline";
+}
+
+function applySocketMessage(jobs: JobRow[], msg: JobSocketMessage): JobRow[] {
+  if (!msg.jobId) return jobs;
+
+  return jobs.map((job) => {
+    if (job.id !== msg.jobId) return job;
+
+    return {
+      ...job,
+      status: msg.status ?? job.status,
+      error: msg.error ?? job.error,
+      s3_key: msg.s3_key ?? job.s3_key,
+      updated_at: msg.at ?? job.updated_at,
+    };
+  });
+}
+
 export default function JobsPage() {
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [title, setTitle] = useState("Звіт по успішності тасків");
-  const [wsState, setWsState] = useState<WsStateLabel>("idle");
+  const [liveStatus, setLiveStatus] = useState<LiveStatus>("offline");
+  const [wsOpen, setWsOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function loadJobs() {
-    setJobs(await getJobs());
-  }
+  const loadJobs = useCallback(async () => {
+    try {
+      setError(null);
+      const rows = await getJobs();
+      setJobs(rows);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Не вдалося завантажити звіти");
+    }
+  }, []);
 
-  useEffect(() => { void loadJobs(); }, []);
+  useEffect(() => {
+    void loadJobs();
+  }, [loadJobs]);
 
   useEffect(() => {
     const ws = new JobsWebSocketClient({
-      onStateChange: setWsState,
+      onStateChange: (state) => {
+        setLiveStatus(getLiveStatus(state));
+        setWsOpen(state === "open");
+      },
     });
 
     const unsubscribe = ws.subscribe((msg) => {
-      if (!msg.jobId) return;
-
       if (msg.type === "connected") return;
 
-      setJobs((prev) =>
-        prev.map((job) => {
-          if (job.id !== msg.jobId) return job;
+      setJobs((prev) => applySocketMessage(prev, msg));
 
-          return {
-            ...job,
-            status: msg.status ?? job.status,
-            error: msg.error ?? job.error,
-            s3_key: msg.s3_key ?? job.s3_key,
-            updated_at: msg.at ?? job.updated_at,
-          };
-        }),
-      );
+      if (msg.type === "completion") {
+        void loadJobs();
+      }
     });
 
     ws.connect();
+
     return () => {
       unsubscribe();
       ws.disconnect();
     };
-  }, []);
+  }, [loadJobs]);
+
+  useEffect(() => {
+    if (wsOpen) return;
+
+    const pollingId = setInterval(() => {
+      void loadJobs();
+    }, 5000);
+
+    return () => clearInterval(pollingId);
+  }, [wsOpen, loadJobs]);
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
-    const new_title = title.trim();
-    if (!new_title) return;
-    await createJob(new_title);
-    setTitle("Звіт по успішності тасків");
-    await loadJobs();
+
+    const newTitle = title.trim();
+    if (!newTitle) return;
+
+    try {
+      setError(null);
+      await createJob(newTitle);
+      setTitle("Звіт по успішності тасків");
+      await loadJobs();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Не вдалося створити звіт");
+    }
   }
 
   return (
     <main className="page page-jobs">
       <h1>Звіти</h1>
-      <p className="hint">Live: {wsState}</p>
+
+      <p className="hint">Live: {liveStatus}</p>
+      {!wsOpen && <p className="hint">Fallback: REST polling активний</p>}
+      {error && <p className="jobs-error">{error}</p>}
 
       <section className="jobs-create">
         <form className="jobs-create-form" onSubmit={handleCreate}>
@@ -81,16 +135,23 @@ export default function JobsPage() {
               onChange={(e) => setTitle(e.target.value)}
             />
           </label>
-          <button type="submit" className="jobs-generate-button"> Згенерувати звіт </button>
+
+          <button type="submit" className="jobs-generate-button">
+            Згенерувати звіт
+          </button>
         </form>
       </section>
 
       <section className="jobs-list-section">
+        <div className="jobs-list-head">
           <h2 className="jobs-section-title">Список звітів</h2>
+          <button type="button" className="jobs-refresh" onClick={() => void loadJobs()}>
+            Оновити
+          </button>
+        </div>
 
         <div className="jobs-table-wrap">
           <table className="jobs-table">
-
             <thead>
               <tr>
                 <th>ID</th>
@@ -111,15 +172,25 @@ export default function JobsPage() {
                       {getStatusTitle(job.status)}
                     </span>
                   </td>
-                  <td className="jobs-table-date">{new Date(job.updated_at).toLocaleString("uk-UA")}</td>
-                  <td><Link to={`/jobs/${job.id}`} className="jobs-link">Деталі</Link></td>
+                  <td className="jobs-table-date">
+                    {new Date(job.updated_at).toLocaleString("uk-UA")}
+                  </td>
+                  <td>
+                    <Link to={`/jobs/${job.id}`} className="jobs-link">
+                      Деталі
+                    </Link>
+                  </td>
                 </tr>
               ))}
-            </tbody>
 
+              {jobs.length === 0 && (
+                <tr>
+                  <td colSpan={5}>Звітів ще немає</td>
+                </tr>
+              )}
+            </tbody>
           </table>
         </div>
-
       </section>
     </main>
   );

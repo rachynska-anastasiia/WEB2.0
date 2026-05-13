@@ -1,9 +1,17 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getJob, getJobResult, type JobStatus } from "../api/jobs";
-import { JobsWebSocketClient } from "../realtime/wsClient";
+import {
+  getJob,
+  getJobResult,
+  type JobRow,
+  type JobStatus,
+} from "../api/jobs";
+import {
+  JobsWebSocketClient,
+  type WebSocketConnectionState,
+} from "../realtime/wsClient";
 
-type WsStateLabel = "idle" | "connecting" | "open" | "closed" | "error";
+type LiveStatus = "connected" | "reconnecting" | "offline";
 
 const STATUS_UA: Record<JobStatus, string> = {
   CREATED: "Створено",
@@ -12,52 +20,84 @@ const STATUS_UA: Record<JobStatus, string> = {
   ERROR: "Помилка",
 };
 
+function getLiveStatus(state: WebSocketConnectionState): LiveStatus {
+  if (state === "open") return "connected";
+  if (state === "connecting" || state === "reconnecting") return "reconnecting";
+  return "offline";
+}
+
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
   const jobId = Number(id);
-  const [title, setTitle] = useState("");
-  const [status, setStatus] = useState<JobStatus | null>(null);
+
+  const [job, setJob] = useState<JobRow | null>(null);
   const [result, setResult] = useState<unknown>(null);
-  const [wsState, setWsState] = useState<WsStateLabel>("idle");
+  const [liveStatus, setLiveStatus] = useState<LiveStatus>("offline");
+  const [wsOpen, setWsOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadJob = useCallback(async () => {
+    if (!Number.isFinite(jobId) || jobId < 1) return;
+
+    try {
+      setError(null);
+
+      const jobRow = await getJob(jobId);
+      setJob(jobRow);
+
+      if (jobRow.status === "DONE") {
+        const data = await getJobResult(jobId);
+        setResult(data);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Не вдалося завантажити звіт");
+    }
+  }, [jobId]);
 
   useEffect(() => {
-    if (!Number.isFinite(jobId) || jobId < 1) return;
-    let cancelled = false;
-
-    (async () => {
-      const job = await getJob(jobId);
-      if (cancelled) return;
-
-      setTitle(job.title);
-      setStatus(job.status);
-
-      if (job.status === "DONE") {
-        const data = await getJobResult(jobId);
-        if (!cancelled) setResult(data);
-      }
-    })();
-
-    return () => { cancelled = true;};
-  }, [jobId]);
+    void loadJob();
+  }, [loadJob]);
 
   useEffect(() => {
     if (!Number.isFinite(jobId) || jobId < 1) return;
 
     let active = true;
+
     const ws = new JobsWebSocketClient({
-      onStateChange: setWsState,
+      onStateChange: (state) => {
+        if (!active) return;
+
+        setLiveStatus(getLiveStatus(state));
+        setWsOpen(state === "open");
+      },
     });
 
     const unsubscribe = ws.subscribe((msg) => {
       if (!active || msg.jobId !== jobId) return;
       if (msg.type === "connected") return;
 
-      if (msg.status) setStatus(msg.status);
+      setJob((currentJob) => {
+        if (!currentJob) return currentJob;
+
+        return {
+          ...currentJob,
+          status: msg.status ?? currentJob.status,
+          error: msg.error ?? currentJob.error,
+          s3_key: msg.s3_key ?? currentJob.s3_key,
+          updated_at: msg.at ?? currentJob.updated_at,
+        };
+      });
 
       if ((msg.type === "completion" || msg.status === "DONE") && msg.success !== false) {
-        void getJobResult(jobId).then((data) => {
-          if (active) setResult(data);
-        });
+        void getJobResult(jobId)
+          .then((data) => {
+            if (active) setResult(data);
+          })
+          .catch((err) => {
+            if (active) {
+              setError(err instanceof Error ? err.message : "Не вдалося отримати результат");
+            }
+          });
       }
     });
 
@@ -70,18 +110,58 @@ export default function JobDetailPage() {
     };
   }, [jobId]);
 
+  useEffect(() => {
+    if (wsOpen) return;
+
+    const pollingId = setInterval(() => {
+      void loadJob();
+    }, 5000);
+
+    return () => clearInterval(pollingId);
+  }, [wsOpen, loadJob]);
+
   return (
     <main className="page page-jobs">
-      <p className="jobs-back"> <Link to="/jobs" className="jobs-link"> &lt; До списку</Link> </p>
+      <p className="jobs-back">
+        <Link to="/jobs" className="jobs-link">
+          &lt; До списку
+        </Link>
+      </p>
+
       <h1>Результат звіту</h1>
-      <p className="hint">Live: {wsState}</p>
-      {title && <p className="hint">{title}</p>}
-      {status && (
-        <p>
-          <span className={`job-status job-status--${status.toLowerCase()}`}>{STATUS_UA[status]}</span>
-        </p>
+
+      <p className="hint">Live: {liveStatus}</p>
+      {!wsOpen && <p className="hint">Fallback: REST polling активний</p>}
+
+      {error && <pre className="jobs-result jobs-result--error">{error}</pre>}
+
+      {job && (
+        <section className="jobs-result-block">
+          <p className="hint">{job.title}</p>
+
+          <p>
+            <span className={`job-status job-status--${job.status.toLowerCase()}`}>
+              {STATUS_UA[job.status]}
+            </span>
+          </p>
+
+          {job.status !== "DONE" && job.status !== "ERROR" && (
+            <p className="hint">Звіт ще обробляється. Сторінка оновлює статус автоматично.</p>
+          )}
+
+          {job.status === "ERROR" && (
+            <pre className="jobs-result jobs-result--error">
+              {job.error || "Помилка генерації звіту"}
+            </pre>
+          )}
+
+          {result !== null && (
+            <pre className="jobs-result">
+              {JSON.stringify(result, null, 2)}
+            </pre>
+          )}
+        </section>
       )}
-      {result !== null && <pre className="jobs-result">{JSON.stringify(result, null, 2)}</pre>}
     </main>
   );
 }
