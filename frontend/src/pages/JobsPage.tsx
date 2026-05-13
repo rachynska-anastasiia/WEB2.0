@@ -1,6 +1,9 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { createJob, getJobs, type JobRow } from "../api/jobs";
+import { JobsWebSocketClient } from "../realtime/wsClient";
+
+type WsStateLabel = "idle" | "connecting" | "open" | "closed" | "error";
 
 function getStatusTitle(status: JobRow["status"]): string {
   if (status === "CREATED") return "Створено";
@@ -13,12 +16,45 @@ function getStatusTitle(status: JobRow["status"]): string {
 export default function JobsPage() {
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [title, setTitle] = useState("Звіт по успішності тасків");
+  const [wsState, setWsState] = useState<WsStateLabel>("idle");
 
   async function loadJobs() {
     setJobs(await getJobs());
   }
 
   useEffect(() => { void loadJobs(); }, []);
+
+  useEffect(() => {
+    const ws = new JobsWebSocketClient({
+      onStateChange: setWsState,
+    });
+
+    const unsubscribe = ws.subscribe((msg) => {
+      if (!msg.jobId) return;
+
+      if (msg.type === "connected") return;
+
+      setJobs((prev) =>
+        prev.map((job) => {
+          if (job.id !== msg.jobId) return job;
+
+          return {
+            ...job,
+            status: msg.status ?? job.status,
+            error: msg.error ?? job.error,
+            s3_key: msg.s3_key ?? job.s3_key,
+            updated_at: msg.at ?? job.updated_at,
+          };
+        }),
+      );
+    });
+
+    ws.connect();
+    return () => {
+      unsubscribe();
+      ws.disconnect();
+    };
+  }, []);
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
@@ -32,6 +68,7 @@ export default function JobsPage() {
   return (
     <main className="page page-jobs">
       <h1>Звіти</h1>
+      <p className="hint">Live: {wsState}</p>
 
       <section className="jobs-create">
         <form className="jobs-create-form" onSubmit={handleCreate}>

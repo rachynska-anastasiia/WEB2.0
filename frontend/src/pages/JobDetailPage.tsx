@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getJob, getJobResult, type JobStatus } from "../api/jobs";
+import { JobsWebSocketClient } from "../realtime/wsClient";
+
+type WsStateLabel = "idle" | "connecting" | "open" | "closed" | "error";
 
 const STATUS_UA: Record<JobStatus, string> = {
   CREATED: "Створено",
@@ -15,6 +18,7 @@ export default function JobDetailPage() {
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState<JobStatus | null>(null);
   const [result, setResult] = useState<unknown>(null);
+  const [wsState, setWsState] = useState<WsStateLabel>("idle");
 
   useEffect(() => {
     if (!Number.isFinite(jobId) || jobId < 1) return;
@@ -36,10 +40,41 @@ export default function JobDetailPage() {
     return () => { cancelled = true;};
   }, [jobId]);
 
+  useEffect(() => {
+    if (!Number.isFinite(jobId) || jobId < 1) return;
+
+    let active = true;
+    const ws = new JobsWebSocketClient({
+      onStateChange: setWsState,
+    });
+
+    const unsubscribe = ws.subscribe((msg) => {
+      if (!active || msg.jobId !== jobId) return;
+      if (msg.type === "connected") return;
+
+      if (msg.status) setStatus(msg.status);
+
+      if ((msg.type === "completion" || msg.status === "DONE") && msg.success !== false) {
+        void getJobResult(jobId).then((data) => {
+          if (active) setResult(data);
+        });
+      }
+    });
+
+    ws.connect();
+
+    return () => {
+      active = false;
+      unsubscribe();
+      ws.disconnect();
+    };
+  }, [jobId]);
+
   return (
     <main className="page page-jobs">
       <p className="jobs-back"> <Link to="/jobs" className="jobs-link"> &lt; До списку</Link> </p>
       <h1>Результат звіту</h1>
+      <p className="hint">Live: {wsState}</p>
       {title && <p className="hint">{title}</p>}
       {status && (
         <p>

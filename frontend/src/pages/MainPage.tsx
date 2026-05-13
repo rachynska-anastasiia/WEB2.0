@@ -9,7 +9,7 @@ export default function MainPage() {
 
   return (
     <main className="page">
-      <h1>Баг-трекер «Канбанчик»</h1>
+      <h1>Трекер задач «Канбанчик»</h1>
       <p>Поставте, будь ласка, нам максимальні бали</p>
       <p>Якщо це Вас не переконало, то можете подивитися на смол ток двох динозаврів</p>
       <pre className="ascii-art">{dinoTalk}</pre>
