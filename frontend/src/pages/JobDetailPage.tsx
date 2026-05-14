@@ -1,15 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import {
-  getJob,
-  getJobResult,
-  type JobRow,
-  type JobStatus,
-} from "../api/jobs";
-import {
-  JobsWebSocketClient,
-  type WebSocketConnectionState,
-} from "../realtime/wsClient";
+import { getJob, getJobResult, type JobRow, type JobStatus } from "../api/jobs";
+import { JobsWebSocketClient } from "../realtime/wsClient";
+import type { WebSocketConnectionState } from "../realtime/wsClient";
 
 type LiveStatus = "connected" | "reconnecting" | "offline";
 
@@ -19,7 +12,7 @@ const STATUS_UA: Record<JobStatus, string> = {
   DONE: "Готово",
   ERROR: "Помилка",
 };
-
+ 
 function getLiveStatus(state: WebSocketConnectionState): LiveStatus {
   if (state === "open") return "connected";
   if (state === "connecting" || state === "reconnecting") return "reconnecting";
@@ -89,14 +82,11 @@ export default function JobDetailPage() {
       });
 
       if ((msg.type === "completion" || msg.status === "DONE") && msg.success !== false) {
-        void getJobResult(jobId)
-          .then((data) => {
+        void getJobResult(jobId).then((data) => {
             if (active) setResult(data);
-          })
-          .catch((err) => {
-            if (active) {
+          }).catch((err) => {
+            if (active)
               setError(err instanceof Error ? err.message : "Не вдалося отримати результат");
-            }
           });
       }
     });

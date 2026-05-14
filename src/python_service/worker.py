@@ -4,10 +4,12 @@ import time
 import random
 import os
 import boto3
+from pathlib import Path
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 
-load_dotenv()
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(_REPO_ROOT / ".env")
 RABBIT_URL = os.getenv("RABBITMQ_URL")
 REQUEST_QUEUE = "job.request"
 EVENT_QUEUE = "job.events"
@@ -25,6 +27,10 @@ def now_time():
 
 
 def connect():
+    if not RABBIT_URL:
+        raise RuntimeError(
+            "RABBITMQ_URL is not set. Add it to .env in the project root or export it."
+        )
     params = pika.URLParameters(RABBIT_URL)
     connection = pika.BlockingConnection(params)
     channel = connection.channel()

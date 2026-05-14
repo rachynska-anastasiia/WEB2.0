@@ -1,14 +1,8 @@
 import { getWebSocketUrl } from "../api/client";
 import type { JobSocketMessage } from "../api/jobs";
 
-export type WebSocketConnectionState =
-  | "idle"
-  | "connecting"
-  | "open"
-  | "reconnecting"
-  | "offline"
-  | "error";
-
+export type WebSocketConnectionState = "idle" | "connecting" | "open" | "reconnecting"  | "offline" | "error";
+ 
 type WebSocketClientOptions = {
   onStateChange?: (state: WebSocketConnectionState) => void;
   onRawMessage?: (data: unknown) => void;
@@ -35,7 +29,7 @@ function isJobSocketMessage(value: unknown): value is JobSocketMessage {
 export class JobsWebSocketClient {
   private ws: WebSocket | null = null;
   private state: WebSocketConnectionState = "idle";
-  private readonly listeners = new Set<(msg: JobSocketMessage) => void>();
+  private listeners = new Set<(msg: JobSocketMessage) => void>();
   private readonly options: WebSocketClientOptions;
 
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -65,9 +59,7 @@ export class JobsWebSocketClient {
       this.ws &&
       (this.ws.readyState === WebSocket.OPEN ||
         this.ws.readyState === WebSocket.CONNECTING)
-    ) {
-      return;
-    }
+    )  return;
 
     this.openSocket();
   }
@@ -82,10 +74,6 @@ export class JobsWebSocketClient {
     }
 
     this.setState("offline");
-  }
-
-  isOpen(): boolean {
-    return this.ws?.readyState === WebSocket.OPEN;
   }
 
   private openSocket(): void {

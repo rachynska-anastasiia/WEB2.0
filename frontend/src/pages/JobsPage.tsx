@@ -20,7 +20,7 @@ function getStatusTitle(status: JobRow["status"]): string {
   if (status === "ERROR") return "Помилка";
   return status;
 }
-
+ 
 function getLiveStatus(state: WebSocketConnectionState): LiveStatus {
   if (state === "open") return "connected";
   if (state === "connecting" || state === "reconnecting") return "reconnecting";
